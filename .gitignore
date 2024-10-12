@@ -131,3 +131,7 @@ dmypy.json
 
 # mac stuff *shakes fist*
 .DS_Store
+
+# interpreter output
+parser.out
+parsetab.py
