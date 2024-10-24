@@ -129,3 +129,19 @@ class Tester(TesterBase):
                     [TAB + l for l in diff if l.startswith("-") or l.startswith("+")]
                 )
             )
+
+
+class BatchRun(TesterBase):
+    def run_section(self):
+        program_source = "\n".join(self.sections[TesterBase.CODE])
+        user_input = self.sections[TesterBase.USER_INPUT]
+
+        with patch("builtins.input", side_effect=user_input):
+            print("```")
+            try:
+                self.callback(program_source)
+
+            except Exception as e:
+                error_message = e.args[0].split(":", 1)[0]
+                print(error_message, file=sys.stderr)
+            print("```")
