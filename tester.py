@@ -2,8 +2,63 @@ import io
 import os
 import re
 import sys
+import time
 import difflib
 from unittest.mock import patch
+
+
+class PrintableReport:
+    def print_report():
+        raise NotImplementedError("print_report must be derived")
+
+
+class TestResults(PrintableReport):
+    def __init__(self) -> None:
+        super().__init__()
+        self._entries = []
+
+    def add_entry(self, passed: bool) -> None:
+        self._entries.append(passed)
+
+    def count_success(self):
+        return len([i for i in self._entries if i])
+
+    def give_score(self) -> tuple[int, int]:
+        return (self.count_success(), len(self._entries))
+
+    def print_report(self):
+        passed, total = self.give_score()
+        print()
+        print("="*40)
+        print(f"score: {passed}/{total}")
+
+
+class ProfilerStats(PrintableReport):
+    def __init__(self) -> None:
+        super().__init__()
+        self._start = None
+        self._records: list[float] = []
+
+    def start(self):
+        self._start = time.time()
+
+    def record(self):
+        if self._start is None:
+            raise RuntimeError("Cannot call end before start")
+        self._records.append(time.time() - self._start)
+        self._start = None
+
+    def total_time(self):
+        return sum(self._records)
+
+    def average_time(self):
+        return self.total_time() / len(self._records)
+
+    def print_report(self):
+        print()
+        print("="*40)
+        print("average time:", 1000 * self.average_time(), "ms")
+        print("total time:", 1000 * self.total_time(), "ms")
 
 
 class TesterBase:
@@ -16,7 +71,6 @@ class TesterBase:
         self.callback = callback
         self.arguments = args
         self.sections = self.blank_section()
-        self.stats = []
 
         state = None
         whitelist = re.compile(r"^$|\*[\w ]+\*|^>")
@@ -91,6 +145,10 @@ class TesterBase:
 
 
 class Tester(TesterBase):
+    def __init__(self, filepath: str, callback, *args):
+        self.result = TestResults()
+        super().__init__(filepath, callback, *args)
+
     def run_section(self):
         program_source = "\n".join(self.sections[TesterBase.CODE])
         user_input = self.sections[TesterBase.USER_INPUT]
@@ -106,7 +164,8 @@ class Tester(TesterBase):
             except Exception as e:
                 error_message = e.args[0].split(":", 1)[0]
                 print(error_message, file=sys.stderr)
-            sys.stdout = sys.__stdout__  # Restore original stdout
+            sys.stdout = sys.__stdout__
+            sys.stderr = sys.__stderr__
 
         print()
         self.match_buffer(stdout_buff.getvalue(), TesterBase.PROG_OUTPUT, "stdout")
@@ -119,8 +178,10 @@ class Tester(TesterBase):
 
         expected = "\n".join(self.sections[tag])
         if recieved == expected:
+            self.result.add_entry(True)
             print(f"{msg}: pass ✔")
         else:
+            self.result.add_entry(False)
             TAB = "  "
             print(f"{msg}: FAIL ❌")
             diff = difflib.ndiff(recieved.splitlines(), expected.splitlines())
@@ -136,6 +197,10 @@ class Tester(TesterBase):
 
 
 class BatchRun(TesterBase):
+    def __init__(self, filepath: str, callback, *args):
+        self.result = ProfilerStats()
+        super().__init__(filepath, callback, *args)
+
     def run_section(self):
         program_source = "\n".join(self.sections[TesterBase.CODE])
         user_input = self.sections[TesterBase.USER_INPUT]
@@ -143,9 +208,12 @@ class BatchRun(TesterBase):
         with patch("builtins.input", side_effect=user_input):
             print("```")
             try:
+                self.result.start()
                 self.callback(program_source)
 
             except Exception as e:
                 error_message = e.args[0].split(":", 1)[0]
                 print(error_message, file=sys.stderr)
+            finally:
+                self.result.record()
             print("```")
