@@ -1,31 +1,105 @@
-# CS 131 Fall 2024: Project Starter
+Index
+-
+- [CS 131 Fall 2024: Project Starter](#cs-131-fall-2024-project-starter)
+  - [Requirements](#requirements)
+  - [Usage](#usage)
+  - [Test Case Formatting](#test-case-formatting)
+  - [Licensing and Attribution](#licensing-and-attribution)
 
-Hey there! This is a template repository that contains the necessary boilerplate for [CS 131](https://ucla-cs-131.github.io/fall-24-website/)'s quarter-long project: making an interpreter. The project specs are as follows:
+# CS 131 Fall 2024: Project Tester
 
-1. [Project 1 Spec](https://docs.google.com/document/d/1npomXM55cXg9Af7BUXEj3_bFpj1sy2Jty2Nwi6Kp64E/edit?usp=sharing)
+I made this project as an alternative light version of the [official autograder](autograder). For the instructions on the project visit the [original project repo](upstream).
 
-There are four stages to the project; students are currently at the first. Thus, this folder contains the necessary bootstrapping code:
+## Setup
 
-- `ply/lex.py`, `ply/yacc.py`, `brewlex.py`, `brewparse.py`, responsible for taking in a string representing a Brewin program and outputting an AST (parser logic)
-- `elements.py`, defines the return type of the parser
-- `intbase.py`, the base class and enum definitions for the interpreter
+As instructed in the spec **do not fork from this directory**. If you clone from here, and plan to publish a private repo in GitHub, delete this repo as origin:
+```sh
+git remote rm origin
+```
+Then verify that the following outputs nothing.
+```
+git remote -v
+```
+Now you can publish without a link to this repo.
 
-Some notes on your submission (for Project 1)
+## Requirements
+My tester was developed and tested on **Python v3.10.0**. Earlier version might not work.
 
-1. You **must have a top-level, versioned `interpreterv1.py` file** that **exports the `Interpreter` class**. If not, **your code will not run on our autograder**.
-2. You may also submit one or more additional `.py` modules that your interpreter uses, if you decide to break up your solution into multiple `.py` files.
-3. You **should not modify/submit** ***any*** of the source files that are present in this base template, which includes:
-* `ply/lex.py`
-* `ply/yacc.py`
-* `brewlex.py`
-* `brewparse.py`
-* `element.py`
-* `intbase.py`
+Also, it only depends on standard libraries and _your_ project files, so you do not need to install any dependencies.
 
-You can find out more about our autograder, including how to run it, in [the accompanying repo](https://github.com/UCLA-CS-131/fall-24-autograder)
+## Usage
+Add a project to the root of this repo. The program automatically seeks from `interpreterv4` in reverse to `interpreterv1` so later projects will take precedence to define the `Interpreter`. If none are found, then the program will exit with error. The main program is very simple so you can easily modify it, if it does not suit your needs.
+
+To test run:
+```
+python ./main.py
+```
+
+This will read from [testCases.md](./testCases.md) to run each test case in there and check its output against correctness. If you wish to simply see the output of each program run:
+```
+python ./main.py -t timeit
+```
+It will also show some simple timing information. You can see this information by running:
+```
+python ./main.py -h
+```
+
+## Test Case Formatting
+I used a rather makeshift unit tester. It essentially lets you write your Brewin code in a markdown file ([testCases.md](./testCases.md)). Its benefits are that since Brewin is pretty similar to Go, you get syntax highlighting for free.
+
+The markdown file is formatted as follows
+```md
+# Title
+## Name of Unit Section 1
+### name of unit test 1
+<!-- test 1 definition -->
+### name of unit test 2
+<!-- test 2 definition -->
+### ...
+### name of unit test i
+<!-- test i definition -->
+
+## Name of Unit Section 2
+### name of unit test 1
+<!-- test 1 definition -->
+<!-- and so on -->
+```
+
+There may only by one title. If you put two you will get an error.
+
+Each individual unit test is formatted as follows:
+````md
+*code*
+```go
+func main() {
+  return;
+}
+```
+
+*user input*
+```
+```
+
+*expected stdout*
+```
+```
+
+*expected stderr*
+```
+```
+````
+
+Fill in the code blocks as appropriate.
+
+The tags such as `*code*` are optional and can contain any text you want, so long as they are enclosed in asterisks. Additionally, you may add remarks anywhere with `> ...`. These along with empty lines (or lines containing only spaces) **are ignored**. Any type of text anywhere will cause an error when parsing the test cases.
+
+> Note: the test cases in this repo are mostly my own with a few ones from the autograder. They are NOT exhaustive.
 
 ## Licensing and Attribution
 
-This is an unlicensed repository; even though the source code is public, it is **not** governed by an open-source license.
+This is an unlicensed repository. My only contribution are the files `tester.py`, `testCases.md`, `main.py`, and `arghelper.py`.
 
-This code was primarily written by [Carey Nachenberg](http://careynachenberg.weebly.com/), with support from his TAs for the [Fall 2024 iteration of CS 131](https://ucla-cs-131.github.io/fall-24-website/).
+Anything elsse was primarily written by [Carey Nachenberg](http://careynachenberg.weebly.com/), with support from his TAs for the [Fall 2024 iteration of CS 131](https://ucla-cs-131.github.io/fall-24-website/).
+
+[upstream]: https://github.com/UCLA-CS-131/fall-24-project-starter
+[autograder]: https://github.com/UCLA-CS-131/fall-24-autograder.git
