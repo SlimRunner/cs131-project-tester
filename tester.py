@@ -29,8 +29,8 @@ class TestResults(PrintableReport):
     def print_report(self):
         passed, total = self.give_score()
         print()
-        print("="*40)
-        print(f"score: {passed}/{total}")
+        print("=" * 40)
+        print(f"score: {passed}/{total}\n")
 
 
 class ProfilerStats(PrintableReport):
@@ -56,9 +56,9 @@ class ProfilerStats(PrintableReport):
 
     def print_report(self):
         print()
-        print("="*40)
+        print("=" * 40)
         print("average time:", 1000 * self.average_time(), "ms")
-        print("total time:", 1000 * self.total_time(), "ms")
+        print("total time:", 1000 * self.total_time(), "ms\n")
 
 
 class TesterBase:
@@ -184,16 +184,14 @@ class Tester(TesterBase):
             self.result.add_entry(False)
             TAB = "  "
             print(f"{msg}: FAIL ❌")
-            diff = difflib.ndiff(recieved.splitlines(), expected.splitlines())
-            print(
-                "\n".join(
-                    [
-                        TAB + f"{i}: {l}"
-                        for i, l in enumerate(diff)
-                        if l.startswith("-") or l.startswith("+")
-                    ]
-                )
-            )
+            diff = list(difflib.ndiff(recieved.splitlines(), expected.splitlines()))
+            rec_str = {
+                i: f"{TAB}[R]: {l[2:]}" for i, l in enumerate(diff) if l.startswith("-")
+            }
+            exp_str = {
+                i: f"{TAB}[e]: {l[2:]}" for i, l in enumerate(diff) if l.startswith("+")
+            }
+            print("\n".join([i for _, i in sorted((rec_str | exp_str).items())]))
 
 
 class BatchRun(TesterBase):
