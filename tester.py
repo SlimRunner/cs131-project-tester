@@ -19,7 +19,7 @@ class TesterBase:
         self.stats = []
 
         state = None
-        whitelist = re.compile(r"^$|\*[\w ]+\*")
+        whitelist = re.compile(r"^$|\*[\w ]+\*|^>")
 
         with open(filepath) as file:
             for line in file:
@@ -109,8 +109,8 @@ class Tester(TesterBase):
             sys.stdout = sys.__stdout__  # Restore original stdout
 
         print()
-        self.match_buffer(stdout_buff.getvalue(), TesterBase.PROG_OUTPUT, "output")
-        self.match_buffer(stderr_buff.getvalue(), TesterBase.ERROR_OUTPUT, "error")
+        self.match_buffer(stdout_buff.getvalue(), TesterBase.PROG_OUTPUT, "stdout")
+        self.match_buffer(stderr_buff.getvalue(), TesterBase.ERROR_OUTPUT, "stderr")
         print()
 
     def match_buffer(self, recieved: str, tag: str, msg: str):
@@ -126,7 +126,11 @@ class Tester(TesterBase):
             diff = difflib.ndiff(recieved.splitlines(), expected.splitlines())
             print(
                 "\n".join(
-                    [TAB + l for l in diff if l.startswith("-") or l.startswith("+")]
+                    [
+                        TAB + f"{i}: {l}"
+                        for i, l in enumerate(diff)
+                        if l.startswith("-") or l.startswith("+")
+                    ]
                 )
             )
 
