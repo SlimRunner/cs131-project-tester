@@ -226,9 +226,51 @@ chain3: 01
 ```
 ```
 
+### Early Return
+
+*code*
+```go
+func main() {
+  print("before return");
+  call_ret();
+  return;
+  print("after return");
+}
+
+func call_ret() {
+  print("func call");
+  if (true) {
+    if (false) {
+      var void;
+    } else {
+      print("nested if");
+      return;
+      print("should not print");
+    }
+    print("should not print");
+  }
+  print("should not print");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+before return
+func call
+nested if
+```
+
+*stderr*
+```
+```
+
 ## If Statements
 
-### No Declaration in Function
+### Shadowing
 
 *description*
 > Attempt to use a variable that doesn't exist in the function call
