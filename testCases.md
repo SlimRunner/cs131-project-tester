@@ -27,7 +27,7 @@ user input
 -45
 ```
 
-*error*
+*stderr*
 ```
 ```
 
@@ -76,7 +76,7 @@ new text
 true
 ```
 
-*error*
+*stderr*
 ```
 ErrorType.NAME_ERROR
 ```
@@ -105,7 +105,7 @@ func main() {
 42
 ```
 
-*error*
+*stderr*
 ```
 ```
 
@@ -139,8 +139,38 @@ func main() {
 31415
 ```
 
-*error*
+*stderr*
 ```
+```
+
+### No Declaration in Function
+
+*description*
+> Attempt to use a variable that doesn't exist in the function call
+
+*code*
+```go
+func main() {
+  foo();
+  print(a);
+}
+
+func foo() {
+  a = 5;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
 ```
 
 ### Call Chain
@@ -154,27 +184,27 @@ func main() {
 }
 
 func chain1(a) {
-    print("chain1: ",a);
-    return a;
+  print("chain1: ",a);
+  return a;
 }
 
 func chain2(a) {
-    a = a + a;
-    print("chain2: ", a);
-    return chain1(a + "3");
+  a = a + a;
+  print("chain2: ", a);
+  return chain1(a + "3");
 }
 
 func chain3(a) {
-    print("chain3: ", a);
-    var newstr;
-    newstr = chain2(a + "22");
-    print("chain3: ", newstr);
-    return newstr;
+  print("chain3: ", a);
+  var newstr;
+  newstr = chain2(a + "22");
+  print("chain3: ", a);
+  return newstr;
 }
 
 func chain4(a) {
-    print("chain4: ", a);
-    return chain3(a + "1");
+  print("chain4: ", a);
+  return chain3(a + "1");
 }
 ```
 
@@ -192,6 +222,43 @@ chain3: 01
 012201223
 ```
 
-*error*
+*stderr*
+```
+```
+
+## If Statements
+
+### No Declaration in Function
+
+*description*
+> Attempt to use a variable that doesn't exist in the function call
+
+*code*
+```go
+func main() {
+  var a;
+  a = 5;
+  if (true) {
+    print(a);
+    var a;
+    a = "foo";
+    print(a);
+  }
+  print(a);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+5
+foo
+5
+```
+
+*stderr*
 ```
 ```
