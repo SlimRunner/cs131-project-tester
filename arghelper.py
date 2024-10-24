@@ -9,8 +9,8 @@ class BlankLinesHelpFormatter(RawTextHelpFormatter):
 
 
 class TestingOptions:
-    UNIT_TEST = "test"
-    RUN_TEST = "run"
+    UNIT_TEST = "testit"
+    RUN_TEST = "timeit"
     OPTIONS = {UNIT_TEST, RUN_TEST}
     DEFAULT = UNIT_TEST
 
@@ -44,7 +44,7 @@ class ArgsWrapper:
 
 def getArguments(*args: str) -> ArgsWrapper:
     arg_parser = ArgumentParser(
-        prog="brew-test",
+        prog="main",
         description="Runs Brewin programs from an markdown file.",
         formatter_class=BlankLinesHelpFormatter,
     )
