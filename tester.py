@@ -66,6 +66,7 @@ class TesterBase:
     USER_INPUT = "stdin"
     PROG_OUTPUT = "stdout"
     ERROR_OUTPUT = "error"
+    TAB = "  "
 
     def __init__(self, filepath: str, callback, *args):
         self.callback = callback
@@ -152,6 +153,7 @@ class Tester(TesterBase):
     def run_section(self):
         program_source = "\n".join(self.sections[TesterBase.CODE])
         user_input = self.sections[TesterBase.USER_INPUT]
+        error_definition = None
 
         with patch("builtins.input", side_effect=user_input):
             stdout_buff = io.StringIO()
@@ -162,14 +164,15 @@ class Tester(TesterBase):
                 self.callback(program_source)
 
             except Exception as e:
-                error_message = e.args[0].split(":", 1)[0]
-                print(error_message, file=sys.stderr)
+                error_name, error_definition = e.args[0].split(":", 1)
+                print(error_name, file=sys.stderr)
             sys.stdout = sys.__stdout__
             sys.stderr = sys.__stderr__
 
         print()
         self.match_buffer(stdout_buff.getvalue(), TesterBase.PROG_OUTPUT, "stdout")
         self.match_buffer(stderr_buff.getvalue(), TesterBase.ERROR_OUTPUT, "stderr")
+        if error_definition: print(f"    {TesterBase.TAB}{error_definition}")
         print()
 
     def match_buffer(self, recieved: str, tag: str, msg: str):
@@ -182,14 +185,13 @@ class Tester(TesterBase):
             print(f"{msg}: pass ✔")
         else:
             self.result.add_entry(False)
-            TAB = "  "
             print(f"{msg}: FAIL ❌")
             diff = list(difflib.ndiff(recieved.splitlines(), expected.splitlines()))
             rec_str = {
-                i: f"{TAB}[R]: {l[2:]}" for i, l in enumerate(diff) if l.startswith("-")
+                i: f"{TesterBase.TAB}[R]: {l[2:]}" for i, l in enumerate(diff) if l.startswith("-")
             }
             exp_str = {
-                i: f"{TAB}[e]: {l[2:]}" for i, l in enumerate(diff) if l.startswith("+")
+                i: f"{TesterBase.TAB}[e]: {l[2:]}" for i, l in enumerate(diff) if l.startswith("+")
             }
             print("\n".join([i for _, i in sorted((rec_str | exp_str).items())]))
 
@@ -210,7 +212,7 @@ class BatchRun(TesterBase):
                 self.callback(program_source)
 
             except Exception as e:
-                error_message = e.args[0].split(":", 1)[0]
+                error_message = e.args[0]
                 print(error_message, file=sys.stderr)
             finally:
                 self.result.record()
