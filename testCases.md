@@ -2,6 +2,33 @@
 
 ## Input and Output
 
+### Print Returns `nil`
+
+*code*
+```go
+func main() {
+  var a;
+  a = print();
+  print(a == nil);
+}
+```
+
+*stdin*
+```
+```
+
+> Note that I added an empty line because the empty print
+
+*stdout*
+```
+
+true
+```
+
+*stderr*
+```
+```
+
 ### Simple User Input
 
 *code*
@@ -83,7 +110,7 @@ ErrorType.NAME_ERROR
 
 ## Operators
 
-### Arithmetic
+### Arithmetic Correctness
 
 *code*
 ```go
@@ -113,7 +140,95 @@ func main() {
 ```
 ```
 
-### Boolean
+### Type Compat - Int Bool
+
+*code*
+```go
+func main() {
+  print(1 + false);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Type Compat - Arith Bool
+
+*code*
+```go
+func main() {
+  print(false - true);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Type Compat - Cond Int
+
+*code*
+```go
+func main() {
+  print(1 || 1);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Type Compat - Unary Bool
+
+*code*
+```go
+func main() {
+  print(-true);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Boolean Correctness
 
 *code*
 ```go
