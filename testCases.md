@@ -81,6 +81,97 @@ true
 ErrorType.NAME_ERROR
 ```
 
+## Operators
+
+### Arithmetic
+
+*code*
+```go
+func main() {
+  var a;
+  var b;
+  a = 5;
+  b = 7;
+
+  var c;
+  c = (a * b - 11 * a / 3) / (b - a);
+
+  print(c * c - (c + b));
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+49
+```
+
+*stderr*
+```
+```
+
+### Boolean
+
+*code*
+```go
+func main() {
+  var X;
+  var A;
+  var B;
+  var C;
+  var D;
+  var E;
+
+  A = true;
+  B = 5 < 3;
+  C = nil != nil;
+  D = false;
+  E = 0 >= 0;
+
+  print(A);
+  print(B);
+  print(C);
+  print(D);
+  print(E);
+
+  X = ((A || !B) && (C || D)) || (!(A && C) && (B || !E));
+  if (X) {
+    print("X = True");
+  } else {
+    print("X = False");
+  }
+
+  if (inputi("...") < -5) {
+    C = true;
+    print("X = ", ((A || !B) && (C || D)) || (!(A && C) && (B || !E)));
+  }
+}
+```
+
+*stdin*
+```
+-100
+```
+
+*stdout*
+```
+true
+false
+false
+false
+true
+X = False
+...
+X = true
+```
+
+*stderr*
+```
+```
+
 ## Functions
 
 ### Simple Call
@@ -328,9 +419,105 @@ nested if
 ```
 ```
 
-## If Statements
+### Simple Recursion - factorial
 
-### Shadowing
+*code*
+```go
+func main() {
+  print(fact(5));
+  print(fact(inputi("Enter a number")));
+}
+
+func fact(n) {
+  if (n <= 1) { return 1; }
+  return n * fact(n-1);
+}
+```
+
+*stdin*
+```
+8
+```
+
+*stdout*
+```
+120
+Enter a number
+40320
+```
+
+*stderr*
+```
+```
+
+### Mutual Recursion
+
+*code*
+```go
+func main() {
+  print(no_ab(4));
+  print(no_ab(inputi("Enter a number")));
+}
+
+func no_ab(n) {
+  if (n == 0) { return 1; }
+  if (n == 1) { return 4; }
+  return 3 * no_ab(n - 1) + no_ab_helper(n);
+}
+
+func no_ab_helper(n) {
+  if (n == 0) { return 0; }
+  if (n == 1) { return 1; }
+  return 2 * no_ab(n - 2) + no_ab_helper(n - 1);
+}
+```
+
+*stdin*
+```
+9
+```
+
+*stdout*
+```
+209
+Enter a number
+151316
+```
+
+*stderr*
+```
+```
+
+## Control Flow
+
+### Simple For Loop
+
+*code*
+```go
+func main() {
+  var i;
+  for (i = 8; i > 0; i = i - 3) {
+    print(i);
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+8
+5
+2
+```
+
+*stderr*
+```
+```
+
+### If-Statement Shadowing
 
 *code*
 ```go
@@ -368,6 +555,54 @@ foo
 bar
 foo
 5
+```
+
+*stderr*
+```
+```
+
+### For-Statement Shadowing
+
+*code*
+```go
+func main() {
+  var varra;
+  varra = 42;
+  var i;
+  for (i = -5; i <= 5; i = i + 1) {
+    var B;
+    B = varra + i;
+    if (B == varra) {
+      print("The answer");
+    } else {
+      print(B);
+    }
+    
+    var varra;
+    varra = i;
+  }
+  print(varra, " outer A");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+37
+38
+39
+40
+41
+The answer
+43
+44
+45
+46
+47
+42 outer A
 ```
 
 *stderr*
