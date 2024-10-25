@@ -8,7 +8,7 @@ Index
 
 # CS 131 Fall 2024: Project Tester
 
-I made this project as an alternative light version of the [official autograder](autograder). For the instructions on the project visit the [original project repo](upstream).
+I made this project as an alternative light version of the [official autograder](https://github.com/UCLA-CS-131/fall-24-project-starter). For the instructions on the project visit the [original project repo](https://github.com/UCLA-CS-131/fall-24-autograder).
 
 ## Setup
 
@@ -100,6 +100,3 @@ The tags such as `*code*` are optional and can contain any text you want, so lon
 This is an unlicensed repository. My only contribution are the files `tester.py`, `testCases.md`, `main.py`, and `arghelper.py`.
 
 Anything else was primarily written by [Carey Nachenberg](http://careynachenberg.weebly.com/), with support from his TAs for the [Fall 2024 iteration of CS 131](https://ucla-cs-131.github.io/fall-24-website/).
-
-[upstream]: https://github.com/UCLA-CS-131/fall-24-project-starter
-[autograder]: https://github.com/UCLA-CS-131/fall-24-autograder.git
