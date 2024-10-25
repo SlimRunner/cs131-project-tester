@@ -95,6 +95,27 @@ The tags such as `*code*` are optional and can contain any text you want, so lon
 
 > Note: the test cases in this repo are mostly my own with a few ones from the autograder. They are NOT exhaustive.
 
+## Scorer Output
+The output of the scorer may look like this:
+```
+# Unit Tests
+## Control Flow
+### If-Statement Shadowing
+
+stdout: FAIL ❌
+  [e]: foo
+  [e]: foo
+  [e]: bar
+  [e]: foo
+  [e]: 5
+stderr: FAIL ❌
+  [R]: ErrorType.NAME_ERROR
+       Variable A defined more than once
+```
+What this is telling you is that both stdout and stderr failed to match the expected output. They have to both succeed for the snippet to count as passed. The `[e]` means that such line _was_ expected. An `[R]` means that such line was recieved (and not expected). Usually `[R]` appears before `[e]` if something was received but doesn't match what was expected. If the next letter is the same it means that either something was recieved and nothing was expected or something was expected but nothing was recieved. This is essentially a regular diff where `-` are `[R]` and `+` are `[e]`.
+
+Either way, in the example above you would navigate to the section in the `testCases` file named `If-Statement Shadowing` to see the snippet that generated the error.
+
 ## Licensing and Attribution
 
 This is an unlicensed repository. My only contribution are the files `tester.py`, `testCases.md`, `main.py`, and `arghelper.py`.
