@@ -174,9 +174,14 @@ class Tester(TesterBase):
             sys.stderr = sys.__stderr__
 
         print()
-        self.match_buffer(stdout_buff.getvalue(), TesterBase.PROG_OUTPUT, "stdout")
-        self.match_buffer(stderr_buff.getvalue(), TesterBase.ERROR_OUTPUT, "stderr")
-        if error_definition: print(f"    {TesterBase.TAB}{error_definition}")
+        out_passed = self.match_buffer(
+            stdout_buff.getvalue(), TesterBase.PROG_OUTPUT, "stdout"
+        )
+        err_passed = self.match_buffer(
+            stderr_buff.getvalue(), TesterBase.ERROR_OUTPUT, "stderr"
+        )
+        if error_definition and not err_passed:
+            print(f"    {TesterBase.TAB}{error_definition}")
         print()
 
     def match_buffer(self, recieved: str, tag: str, msg: str):
@@ -187,17 +192,23 @@ class Tester(TesterBase):
         if recieved == expected:
             self.result.add_entry(True)
             print(f"{msg}: pass ✔")
+            return True
         else:
             self.result.add_entry(False)
             print(f"{msg}: FAIL ❌")
             diff = list(difflib.ndiff(recieved.splitlines(), expected.splitlines()))
             rec_str = {
-                i: f"{TesterBase.TAB}[R]: {l[2:]}" for i, l in enumerate(diff) if l.startswith("-")
+                i: f"{TesterBase.TAB}[R]: {l[2:]}"
+                for i, l in enumerate(diff)
+                if l.startswith("-")
             }
             exp_str = {
-                i: f"{TesterBase.TAB}[e]: {l[2:]}" for i, l in enumerate(diff) if l.startswith("+")
+                i: f"{TesterBase.TAB}[e]: {l[2:]}"
+                for i, l in enumerate(diff)
+                if l.startswith("+")
             }
             print("\n".join([i for _, i in sorted((rec_str | exp_str).items())]))
+            return False
 
 
 class BatchRun(TesterBase):
