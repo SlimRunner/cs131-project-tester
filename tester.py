@@ -164,7 +164,11 @@ class Tester(TesterBase):
                 self.callback(program_source)
 
             except Exception as e:
-                error_name, error_definition = e.args[0].split(":", 1)
+                err_split = e.args[0].split(":", 1)
+                if len(err_split) == 2:
+                    error_name, error_definition = err_split
+                else:
+                    error_name, error_definition = (e.args[0], "")
                 print(error_name, file=sys.stderr)
             sys.stdout = sys.__stdout__
             sys.stderr = sys.__stderr__

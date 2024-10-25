@@ -20,7 +20,7 @@
 		"scope": "markdown",
 		"prefix": "addunit",
 		"body": [
-			"### ${0: Unit Title}",
+			"### ${0:Unit Title}",
 			"",
 			"*code*",
 			"```go$1",
