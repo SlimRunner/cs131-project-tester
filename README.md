@@ -39,13 +39,13 @@ This will read from [testCases.md](./testCases.md) to run each test case in ther
 ```
 python ./main.py -t timeit
 ```
-It will also show some simple timing information. You can see this information by running:
+It will also show some simple timing information. There is only one flag but if you want to quickly check the options call the help flag:
 ```
 python ./main.py -h
 ```
 
 ## Test Case Formatting
-I used a rather makeshift unit tester. It essentially lets you write your Brewin code in a markdown file ([testCases.md](./testCases.md)). Its benefits are that since Brewin is pretty similar to Go, you get syntax highlighting for free.
+I used a rather makeshift unit tester. It essentially lets you write your Brewin code in a markdown file ([testCases.md](./testCases.md)). Its benefits are that since Brewin is pretty similar to Go, you get syntax highlighting for free in code blocks.
 
 The markdown file is formatted as follows
 ```md
@@ -65,7 +65,7 @@ The markdown file is formatted as follows
 <!-- and so on -->
 ```
 
-There may only by one title. If you put two you will get an error.
+There may only by one title and it must be first. If you do not follow that you will get an error.
 
 Each individual unit test is formatted as follows:
 ````md
@@ -89,7 +89,7 @@ func main() {
 ```
 ````
 
-Fill in the code blocks as appropriate.
+Fill in the code blocks as appropriate. **Also if you use VSCode I added a custom snippet to add the boilerplate**. To use the snippet type `addunit` then press `ctrl+space` to get the suggestions (since markdown files do not automatically bring up the autocomplete). Finally, press enter and fill in the blanks as you want.
 
 The tags such as `*code*` are optional and can contain any text you want, so long as they are enclosed in asterisks. Additionally, you may add remarks anywhere with `> ...`. These along with empty lines (or lines containing only spaces) **are ignored**. Any type of text anywhere will cause an error when parsing the test cases.
 
@@ -99,7 +99,7 @@ The tags such as `*code*` are optional and can contain any text you want, so lon
 
 This is an unlicensed repository. My only contribution are the files `tester.py`, `testCases.md`, `main.py`, and `arghelper.py`.
 
-Anything elsse was primarily written by [Carey Nachenberg](http://careynachenberg.weebly.com/), with support from his TAs for the [Fall 2024 iteration of CS 131](https://ucla-cs-131.github.io/fall-24-website/).
+Anything else was primarily written by [Carey Nachenberg](http://careynachenberg.weebly.com/), with support from his TAs for the [Fall 2024 iteration of CS 131](https://ucla-cs-131.github.io/fall-24-website/).
 
 [upstream]: https://github.com/UCLA-CS-131/fall-24-project-starter
 [autograder]: https://github.com/UCLA-CS-131/fall-24-autograder.git
