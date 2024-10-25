@@ -173,6 +173,66 @@ func foo() {
 ErrorType.NAME_ERROR
 ```
 
+### Double Declaration in Function
+
+*code*
+```go
+func main() {
+  var a;
+  foo();
+}
+
+func foo() {
+  var a;
+  a = "all good";
+  print(a);
+  var a;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+all good
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Invalid Parameter Shadow
+
+*code*
+```go
+func main() {
+  var a;
+  foo("entered function");
+}
+
+func foo(a) {
+  print(a);
+  var a;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+entered function
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
 ### Call Chain
 
 *code*
@@ -272,21 +332,27 @@ nested if
 
 ### Shadowing
 
-*description*
-> Attempt to use a variable that doesn't exist in the function call
-
 *code*
 ```go
 func main() {
-  var a;
-  a = 5;
+  var A;
+  A = 5;
   if (true) {
-    print(a);
-    var a;
-    a = "foo";
-    print(a);
+    print(A);
+    var A;
+    A = "foo";
+    print(A);
+    if (false) {
+      var A;
+    } else {
+      print(A);
+      var A;
+      A = "bar";
+      print(A);
+    }
+    print(A);
   }
-  print(a);
+  print(A);
 }
 ```
 
@@ -297,6 +363,9 @@ func main() {
 *stdout*
 ```
 5
+foo
+foo
+bar
 foo
 5
 ```
