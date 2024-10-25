@@ -180,6 +180,7 @@ class Tester(TesterBase):
         err_passed = self.match_buffer(
             stderr_buff.getvalue(), TesterBase.ERROR_OUTPUT, "stderr"
         )
+        self.result.add_entry(out_passed and err_passed)
         if error_definition and not err_passed:
             print(f"    {TesterBase.TAB}{error_definition}")
         print()
@@ -190,11 +191,9 @@ class Tester(TesterBase):
 
         expected = "\n".join(self.sections[tag])
         if recieved == expected:
-            self.result.add_entry(True)
             print(f"{msg}: pass ✔")
             return True
         else:
-            self.result.add_entry(False)
             print(f"{msg}: FAIL ❌")
             diff = list(difflib.ndiff(recieved.splitlines(), expected.splitlines()))
             rec_str = {
