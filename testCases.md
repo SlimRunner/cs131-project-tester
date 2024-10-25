@@ -108,6 +108,90 @@ true
 ErrorType.NAME_ERROR
 ```
 
+### Double Declaration
+
+*code*
+```go
+func main() {
+  var a;
+  var a;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Double Declaration Inside If-Scope
+
+*code*
+```go
+func main() {
+  var a;
+  if (true) {
+    var a;
+    print("no error yet");
+    var a;
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+no error yet
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Double Declaration Inside For-Scope
+
+*code*
+```go
+func main() {
+  var a;
+  for (a = 0; false; a = a) {
+    var a;
+    print("never happens");
+    var a;
+  }
+  for (a = 0; true; a = a) {
+    var a;
+    print("no error yet");
+    var a;
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+no error yet
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
 ## Operators
 
 ### Arithmetic Correctness
@@ -281,6 +365,56 @@ true
 X = False
 ...
 X = true
+```
+
+*stderr*
+```
+```
+
+### Mixed Comparison
+
+*code*
+```go
+func main () {
+  var a;
+  var b;
+  var c;
+  var d;
+  var e;
+  a = true;
+  b = 5;
+  c = "5";
+  d = "true";
+  e = nil;
+
+  print(a == b);
+  print(b == c);
+  print(a != d);
+  print(c != d);
+
+  print(e != a);
+  print(e != b);
+  print(e == c);
+  print(e == d);
+  print(e == e);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+false
+false
+true
+true
+true
+true
+false
+false
+true
 ```
 
 *stderr*
@@ -605,6 +739,80 @@ Enter a number
 
 ## Control Flow
 
+### If-Statement Condition is Boolean
+
+*code*
+```go
+func main() {
+  if (1) {
+    print("Condition MUST be boolean. This is int.");
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### For-Statement Condition is Boolean
+
+*code*
+```go
+func main() {
+  var i;
+  for (i = "a"; 0; i = i) {
+    print("Condition MUST be boolean. This is int.");
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### If-Statement Scope Lifetime
+
+*code*
+```go
+func main() {
+  if (true) {
+    var x;
+  }
+  x = 5;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
 ### Simple For Loop
 
 *code*
@@ -630,6 +838,58 @@ func main() {
 
 *stderr*
 ```
+```
+
+### Mixed If-For
+
+*code*
+```go
+func main() {
+  var vd;
+  vd = false;
+  if (inputs() == "I'm in") {
+    var i;
+    for (i = 0; i < 10; i = i + 1) {
+      var x;
+      x = i * i - 7 * i + 10 > 0;
+      if (x) {
+        vd = x;
+        print("above zero");
+      } else {
+        print("below zero");
+      }
+      var i;
+      i = x;
+    }
+    print(i);
+    print(x);
+  }
+}
+```
+
+*stdin*
+```
+I'm in
+```
+
+*stdout*
+```
+above zero
+above zero
+below zero
+below zero
+below zero
+below zero
+above zero
+above zero
+above zero
+above zero
+10
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
 ```
 
 ### If-Statement Shadowing
@@ -688,7 +948,9 @@ func main() {
     var B;
     B = varra + i;
     if (B == varra) {
-      print("The answer");
+      var B;
+      B = " to the universe";
+      print("The answer" + B);
     } else {
       print(B);
     }
@@ -711,7 +973,7 @@ func main() {
 39
 40
 41
-The answer
+The answer to the universe
 43
 44
 45
