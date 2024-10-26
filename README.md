@@ -28,24 +28,30 @@ My tester was developed and tested on **Python v3.10.0**. Earlier version might 
 Also, it only depends on standard libraries and _your_ project files, so you do not need to install any dependencies.
 
 ## Usage
-Add a project to the root of this repo. The program automatically seeks from `interpreterv4` in reverse to `interpreterv1` so later projects will take precedence to define the `Interpreter`. If none are found, then the program will exit with error. The main program is very simple so you can easily modify it, if it does not suit your needs.
+Add a project to the root of this repo. The program automatically seeks all files named `interpreterv#.py` and `testsuitev#.md` where `#` can be any number (including zero padded numbers). If you pass no flags, the command will run the project with the highest version that has **both an interpreter and a testsuite** and it will run in testing mode. If you want to change the behavior of how it starts up, `main.py` was made as simple as possible to make editing it easy.
 
-To test run:
+The command to run the default options is
 ```
 python ./main.py
 ```
 
-This will read from [testCases.md](./testCases.md) to run each test case in there and check its output against correctness. If you wish to simply see the output of each program run:
+You can also manually select which project you want to run. If, for example, you want to run `interpreterv2.py` you would run
+```
+python ./main.py -p 2
+```
+If instead of making a test run you want to see the actual program output you can run the profiler
 ```
 python ./main.py -t timeit
 ```
-It will also show some simple timing information. There is only one flag but if you want to quickly check the options call the help flag:
+The profiler will also show some simple time average and total.
+
+If you want to see extended information about these options call
 ```
 python ./main.py -h
 ```
 
 ## Test Case Formatting
-I used a rather makeshift unit tester. It essentially lets you write your Brewin code in a markdown file ([testCases.md](./testCases.md)). Its benefits are that since Brewin is pretty similar to Go, you get syntax highlighting for free in code blocks.
+I used a rather makeshift unit tester. It essentially lets you write your Brewin code in a markdown file (i.e. [testsuitev2.md](./testsuitev2.md)). Its benefits are that since Brewin is pretty similar to Go, you get syntax highlighting for free in code blocks.
 
 The markdown file is formatted as follows
 ```md
