@@ -60,7 +60,9 @@ def find_interpreters() -> dict[str, ProjectEntry]:
     return entries
 
 
-def choose_project(proj_version, interpreters, target_module):
+def choose_project(
+    proj_version: str, interpreters: dict[str, ProjectEntry], target_module: str
+):
     if proj_version not in interpreters:
         raise SystemExit(f"There is no project version {proj_version}.")
     elif not interpreters[proj_version].is_valid():
@@ -68,11 +70,12 @@ def choose_project(proj_version, interpreters, target_module):
             f"Project version {proj_version} is missing {interpreters[proj_version].what_is_missing()}."
         )
     Interpreter = load_module(interpreters[proj_version].interpreter, target_module)
-    test_path = interpreters[proj_version].testsuite + ".md"
+    # valid_interpreters[0].testsuite narrowed from (str | None) to (str)
+    test_path = f"{interpreters[proj_version].testsuite}.md"
     return Interpreter, test_path
 
 
-def choose_latest_project(interpreters, target_module):
+def choose_latest_project(interpreters: dict[str, ProjectEntry], target_module: str):
     sorted_interpreters = [
         entry for _, entry in sorted(interpreters.items(), reverse=True)
     ]
@@ -85,6 +88,7 @@ def choose_latest_project(interpreters, target_module):
         )
 
     Interpreter = load_module(valid_interpreters[0].interpreter, target_module)
-    test_path = valid_interpreters[0].testsuite + ".md"
+    # valid_interpreters[0].testsuite narrowed from (str | None) to (str)
+    test_path = f"{valid_interpreters[0].testsuite}.md"
     print("Running interpreter version", valid_interpreters[0].version, "\n")
     return Interpreter, test_path

@@ -29,4 +29,7 @@ if __name__ == "__main__":
     else:
         Interpreter, test_path = choose_latest_project(interpreters, TARGET_MODULE)
 
+    if Interpreter is None:
+        raise SystemExit("Unexpected exit: Interpreter is None.")
+
     main(Interpreter, test_path, args)
