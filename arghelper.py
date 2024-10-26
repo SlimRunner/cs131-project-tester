@@ -33,13 +33,24 @@ class TestingOptions:
         return self.__options[TestingOptions.RUN_TEST]
 
 
+def strVersion(val: str):
+    if not val.isnumeric():
+        raise ValueError("Version should be numeric")
+    return val
+
+
 class ArgsWrapper:
     def __init__(self, args) -> None:
         self.__test_type = args.test_type
+        self.__project = args.project
 
     @property
     def test_type(self) -> TestingOptions:
         return self.__test_type
+
+    @property
+    def project(self) -> str | None:
+        return self.__project
 
 
 def getArguments(*args: str) -> ArgsWrapper:
@@ -62,6 +73,15 @@ def getArguments(*args: str) -> ArgsWrapper:
             """
         ),
     )
+    # Version is string because this allows to distinguish v1 from v01 and so on
+    arg_parser.add_argument(
+        "-p",
+        "--project",
+        nargs=1,
+        type=strVersion,
+        metavar="VERSION",
+        help="Run a specific project VERSION. If ommited, newest is used."
+    )
 
     if len(args) > 0:
         p_args = arg_parser.parse_args(list(args))
@@ -69,5 +89,6 @@ def getArguments(*args: str) -> ArgsWrapper:
         p_args = arg_parser.parse_args()
 
     p_args.test_type = TestingOptions(p_args.test_type[0])
+    p_args.project = p_args.project[0] if p_args.project else p_args.project
 
     return ArgsWrapper(p_args)
