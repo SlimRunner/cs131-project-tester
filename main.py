@@ -1,42 +1,32 @@
-import sys
-import importlib.util
 from tester import Tester, BatchRun
-from arghelper import getArguments, TestingOptions
+from arghelper import getArguments, TestingOptions, ArgsWrapper
+from testersetup import find_interpreters, choose_project, choose_latest_project
 
 
-def main(Interpreter, args):
+def main(Interpreter: type, test_path: str, args: ArgsWrapper):
     match args.test_type:
         case TestingOptions.UNIT_TEST:
             interpreter = Interpreter()
-            test_results = Tester("./testCases.md", interpreter.run)
+            test_results = Tester(test_path, interpreter.run)
             test_results.result.print_report()
         case TestingOptions.RUN_TEST:
             interpreter = Interpreter()
-            test_results = BatchRun("./testCases.md", interpreter.run)
+            test_results = BatchRun(test_path, interpreter.run)
             test_results.result.print_report()
         case _:
             pass
 
 
-def load_module(name, pckg):
-    spec = importlib.util.find_spec(name)
-    if spec is not None:
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[name] = module
-        spec.loader.exec_module(module)
-        return module.Interpreter
-    else:
-        return None
-
-
 if __name__ == "__main__":
     args = getArguments()
-    for i in range(4, 0, -1):
-        Interpreter = load_module(f"interpreterv{i}", "Interpreter")
-        if Interpreter is not None:
-            break
+    interpreters = find_interpreters()
+    TARGET_MODULE = "Interpreter"
 
-    if Interpreter is None:
-        raise SystemExit("No projects were found.")
+    if args.project:
+        Interpreter, test_path = choose_project(
+            args.project, interpreters, TARGET_MODULE
+        )
+    else:
+        Interpreter, test_path = choose_latest_project(interpreters, TARGET_MODULE)
 
-    main(Interpreter, args)
+    main(Interpreter, test_path, args)
