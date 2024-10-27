@@ -134,20 +134,29 @@ class TesterBase:
     def run_section(self, unit: dict[str, list[str]]):
         raise NotImplementedError("print_report must be derived")
 
+    def is_filtered(self, key: str, filter: set[str]):
+        if len(filter) == 0:
+            return False
+        remove_hash = re.compile(r"^#+ ")
+        key = remove_hash.sub("", key).lower()
+        return key not in filter
+
     def run_tests(self, section_filter: set[str] = set(), unit_filter: set[str] = set()):
         print_buffer: list[str] = []
+        section_filter = {i.lower() for i in section_filter}
+        unit_filter = {i.lower() for i in unit_filter}
 
         for name, title in self.__ttree.items():
             print_buffer.append(name)
             for name, section in title.items():
                 has_children = False
                 print_buffer.append(name)
-                if len(section_filter) > 0 and name not in section_filter:
+                if self.is_filtered(name, section_filter):
                     print_buffer.pop()
                     continue
                 for name, unit in section.items():
                     print_buffer.append(name)
-                    if len(unit_filter) > 0 and name not in unit_filter:
+                    if self.is_filtered(name, unit_filter):
                         print_buffer.pop()
                         continue
                     has_children = True
