@@ -141,7 +141,9 @@ class TesterBase:
         key = remove_hash.sub("", key).lower()
         return key not in filter
 
-    def run_tests(self, section_filter: set[str] = set(), unit_filter: set[str] = set()):
+    def run_tests(
+        self, section_filter: set[str] = set(), unit_filter: set[str] = set()
+    ):
         print_buffer: list[str] = []
         section_filter = {i.lower() for i in section_filter}
         unit_filter = {i.lower() for i in unit_filter}

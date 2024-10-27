@@ -86,21 +86,15 @@ def getArguments(*args: str) -> ArgsWrapper:
         nargs=1,
         type=strVersion,
         metavar="VERSION",
-        help="Run a specific project VERSION. If ommited, newest is used."
+        help="Run a specific project VERSION. If ommited, newest is used.",
     )
 
     filter_group = arg_parser.add_mutually_exclusive_group()
     filter_group.add_argument(
-        "-s",
-        "--section",
-        nargs="+",
-        help="Filter by a specific set of sections."
+        "-s", "--section", nargs="+", help="Filter by a specific set of sections."
     )
     filter_group.add_argument(
-        "-u",
-        "--unit",
-        nargs="+",
-        help="Filter by a specific set of units."
+        "-u", "--unit", nargs="+", help="Filter by a specific set of units."
     )
 
     if len(args) > 0:
