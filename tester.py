@@ -278,7 +278,7 @@ class Tester(TesterBase):
         )
         self.result.add_entry(out_passed and err_passed)
         if error_definition and not err_passed:
-            print(f"    {TesterBase.TAB}{error_definition}")
+            print(f"{TesterBase.TAB*4}{error_definition}")
         print()
 
     def match_buffer(self, recieved: str, unit_block: list[str], msg: str):
@@ -293,12 +293,12 @@ class Tester(TesterBase):
             print(f"- {msg}: FAIL ❌")
             diff = list(difflib.ndiff(recieved.splitlines(), expected.splitlines()))
             rec_str = {
-                i: f"{TesterBase.TAB}[R]: {l[2:]}"
+                i: f"{TesterBase.TAB}- `R`: {l[2:]}"
                 for i, l in enumerate(diff)
                 if l.startswith("-")
             }
             exp_str = {
-                i: f"{TesterBase.TAB}[e]: {l[2:]}"
+                i: f"{TesterBase.TAB}- `e`: {l[2:]}"
                 for i, l in enumerate(diff)
                 if l.startswith("+")
             }
