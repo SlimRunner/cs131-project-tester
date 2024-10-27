@@ -141,7 +141,7 @@ The output of the scorer may look like this:
 ```
 It is formatted in such a way that it can look good in markdown if you wanted to redirect the output to a markdown file to inspect it more easily.
 
-What this is telling you is that both stdout and stderr failed to match the expected output. They have to both succeed for the snippet to count as passed. The `e` means that such line _was_ **e**xpected. An `R` means that such line was **R**eceived (and not expected). The letter `R` will appear before `e` if the former was received but doesn't match the latter. Otherwise, it means that nothing was received or nothing was expected. This output comes from a diff between what was received and what was expected.
+What this is telling you is that both stdout and stderr failed to match the expected output. They have to both succeed for the snippet to count as passed. The `e` means that such line _was_ **e**xpected. An `R` means that such line was **R**eceived (and not expected). The letter `e` will appear before `R` if the latter was received but doesn't match the former. Any other order means the pair is unrelated, and either nothing was received or nothing was expected. This output comes from a diff between the program output and the expected output.
 
 In the example above you would navigate to the section named `If-Statement Shadowing` in the appropriate `testsuite` file to see the snippet that generated the error.
 
