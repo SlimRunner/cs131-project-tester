@@ -12,7 +12,7 @@ def main(Interpreter: type, proj_path: str, test_path: str, args: ArgsWrapper):
         case TestingOptions.RUN_TEST:
             tester = BatchRun(proj_path, test_path, interpreter.run)
         case _:
-            pass
+            raise SystemExit(f"Unexpected test type: {args.test_type}")
 
     tester.run_tests(**args.filters)
     tester.result.print_report()
