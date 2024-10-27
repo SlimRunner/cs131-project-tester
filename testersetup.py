@@ -8,11 +8,13 @@ class ProjectEntry:
     def __init__(self, version: str) -> None:
         self.interpreter: str | None = None
         self.testsuite: str | None = None
-        self._version: str = version
+        self.interpreter_path: str | None = None
+        self.testsuite_path: str | None = None
+        self.__version: str = version
 
     @property
     def version(self) -> str:
-        return self._version
+        return self.__version
 
     def is_valid(self):
         return not (self.interpreter is None or self.testsuite is None)
@@ -56,6 +58,7 @@ def find_interpreters() -> dict[str, ProjectEntry]:
         if ver not in entries:
             entries[ver] = ProjectEntry(ver)
         setattr(entries[ver], name[:-1], name + ver)
+        setattr(entries[ver], f"{name[:-1]}_path", os.path.join(proj_root, filename))
 
     return entries
 
@@ -71,8 +74,9 @@ def choose_project(
         )
     Interpreter = load_module(interpreters[proj_version].interpreter, target_module)
     # valid_interpreters[0].testsuite narrowed from (str | None) to (str)
-    test_path = f"{interpreters[proj_version].testsuite}.md"
-    return Interpreter, test_path
+    test_path = interpreters[proj_version].testsuite_path
+    proj_path = interpreters[proj_version].interpreter_path
+    return Interpreter, proj_path, test_path
 
 
 def choose_latest_project(interpreters: dict[str, ProjectEntry], target_module: str):
@@ -89,6 +93,7 @@ def choose_latest_project(interpreters: dict[str, ProjectEntry], target_module: 
 
     Interpreter = load_module(valid_interpreters[0].interpreter, target_module)
     # valid_interpreters[0].testsuite narrowed from (str | None) to (str)
-    test_path = f"{valid_interpreters[0].testsuite}.md"
+    test_path = valid_interpreters[0].testsuite_path
+    proj_path = valid_interpreters[0].interpreter_path
     print("Running interpreter version", valid_interpreters[0].version, "\n")
-    return Interpreter, test_path
+    return Interpreter, proj_path, test_path

@@ -1,4 +1,5 @@
 import io
+import os
 import re
 import sys
 import time
@@ -7,57 +8,75 @@ from unittest.mock import patch
 
 
 class PrintableReport:
+    def __init__(self, proj_path: str, test_path: str) -> None:
+        self.__test_path = test_path
+        self.__proj_path = proj_path
+
+    @property
+    def suite_name(self) -> str:
+        return f"./{os.path.relpath(self.__test_path)}"
+
+    @property
+    def module_name(self) -> str:
+        return f"./{os.path.relpath(self.__proj_path)}"
+
     def print_report():
         raise NotImplementedError("print_report must be derived")
 
 
 class TestResults(PrintableReport):
-    def __init__(self) -> None:
-        super().__init__()
-        self._entries = []
+    def __init__(self, proj_path: str, test_path: str) -> None:
+        super().__init__(proj_path, test_path)
+        self.__entries = []
 
     def add_entry(self, passed: bool) -> None:
-        self._entries.append(passed)
+        self.__entries.append(passed)
 
     def count_success(self):
-        return len([i for i in self._entries if i])
+        return len([i for i in self.__entries if i])
 
     def give_score(self) -> tuple[int, int]:
-        return (self.count_success(), len(self._entries))
+        return (self.count_success(), len(self.__entries))
 
     def print_report(self):
         passed, total = self.give_score()
+        COLSIZE = 8
         print()
         print("=" * 40)
-        print(f"score: {passed}/{total}\n")
+        print(f"{'module:':<{COLSIZE}}{self.module_name}")
+        print(f"{'suite:':<{COLSIZE}}{self.suite_name}")
+        print(f"{'score:':<{COLSIZE}}{passed}/{total}\n")
 
 
 class ProfilerStats(PrintableReport):
-    def __init__(self) -> None:
-        super().__init__()
-        self._start = None
-        self._records: list[float] = []
+    def __init__(self, proj_path: str, test_path: str) -> None:
+        super().__init__(proj_path, test_path)
+        self.__start = None
+        self.__records: list[float] = []
 
     def start(self):
-        self._start = time.time()
+        self.__start = time.time()
 
     def record(self):
-        if self._start is None:
+        if self.__start is None:
             raise RuntimeError("Cannot call end before start")
-        self._records.append(time.time() - self._start)
-        self._start = None
+        self.__records.append(time.time() - self.__start)
+        self.__start = None
 
     def total_time(self):
-        return sum(self._records)
+        return sum(self.__records)
 
     def average_time(self):
-        return self.total_time() / len(self._records)
+        return self.total_time() / len(self.__records)
 
     def print_report(self):
+        COLSIZE = 14
         print()
         print("=" * 40)
-        print("average time:", 1000 * self.average_time(), "ms")
-        print("total time:", 1000 * self.total_time(), "ms\n")
+        print(f"{'module:':<{COLSIZE}}{self.module_name}")
+        print(f"{'suite:':<{COLSIZE}}{self.suite_name}")
+        print(f"{'average time:':<{COLSIZE}}{1000 * self.average_time()} ms")
+        print(f"{'total time:':<{COLSIZE}}{1000 * self.total_time()} ms\n")
 
 
 class TesterBase:
@@ -67,7 +86,7 @@ class TesterBase:
     ERROR_OUTPUT = "error"
     TAB = "  "
 
-    def __init__(self, filepath: str, callback, *args):
+    def __init__(self, test_path: str, callback, *args):
         self.callback = callback
         self.arguments = args
         self.sections = self.blank_section()
@@ -75,7 +94,7 @@ class TesterBase:
         state = None
         whitelist = re.compile(r"^$|\*[\w ]+\*|^>")
 
-        with open(filepath) as file:
+        with open(test_path) as file:
             for line in file:
                 line = line.rstrip()
 
@@ -145,9 +164,9 @@ class TesterBase:
 
 
 class Tester(TesterBase):
-    def __init__(self, filepath: str, callback, *args):
-        self.result = TestResults()
-        super().__init__(filepath, callback, *args)
+    def __init__(self, proj_path, test_path: str, callback, *args):
+        self.result = TestResults(proj_path, test_path)
+        super().__init__(test_path, callback, *args)
 
     def run_section(self):
         program_source = "\n".join(self.sections[TesterBase.CODE])
@@ -210,9 +229,9 @@ class Tester(TesterBase):
 
 
 class BatchRun(TesterBase):
-    def __init__(self, filepath: str, callback, *args):
-        self.result = ProfilerStats()
-        super().__init__(filepath, callback, *args)
+    def __init__(self, proj_path, test_path: str, callback, *args):
+        self.result = ProfilerStats(proj_path, test_path)
+        super().__init__(test_path, callback, *args)
 
     def run_section(self):
         program_source = "\n".join(self.sections[TesterBase.CODE])
