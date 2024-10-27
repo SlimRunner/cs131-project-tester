@@ -20,10 +20,10 @@
 		"scope": "markdown",
 		"prefix": "addunit",
 		"body": [
-			"### ${0:Unit Title}",
+			"### ${1:Unit Title}",
 			"",
 			"*code*",
-			"```go$1",
+			"```go$0",
 			"```",
 			"",
 			"*stdin*",
@@ -39,5 +39,31 @@
 			"```",
 		],
 		"description": "Adds the boiler-plate to add a unit test"
-	}
+	},
+	"Name Error": {
+		"scope": "markdown",
+		"prefix": "namerror",
+		"body": [
+			"ErrorType.NAME_ERROR",
+		],
+		"description": "Adds the NAME_ERROR name"
+	},
+	"Type Error": {
+		"scope": "markdown",
+		"prefix": "typerror",
+		"body": [
+			"ErrorType.TYPE_ERROR",
+		],
+		"description": "Adds the TYPE_ERROR name"
+	},
+	"main Function": {
+		"scope": "markdown,go",
+		"prefix": "main",
+		"body": [
+			"func main() {",
+			"\t$0",
+			"}",
+		],
+		"description": "Adds the main function"
+	},
 }
