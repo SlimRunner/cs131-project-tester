@@ -4,19 +4,18 @@ from testersetup import find_interpreters, choose_project, choose_latest_project
 
 
 def main(Interpreter: type, proj_path: str, test_path: str, args: ArgsWrapper):
+    interpreter = Interpreter()
+
     match args.test_type:
         case TestingOptions.UNIT_TEST:
-            interpreter = Interpreter()
             tester = Tester(proj_path, test_path, interpreter.run)
-            tester.run_tests(**args.filters)
-            tester.result.print_report()
         case TestingOptions.RUN_TEST:
-            interpreter = Interpreter()
             tester = BatchRun(proj_path, test_path, interpreter.run)
-            tester.run_tests(**args.filters)
-            tester.result.print_report()
         case _:
             pass
+
+    tester.run_tests(**args.filters)
+    tester.result.print_report()
 
 
 if __name__ == "__main__":
