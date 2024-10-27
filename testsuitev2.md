@@ -60,7 +60,7 @@ user input
 
 ## Variables
 
-### Declaration & Assignment
+### Declaration and Assignment
 
 *code*
 ```go
