@@ -43,6 +43,8 @@ class ArgsWrapper:
     def __init__(self, args) -> None:
         self.__test_type = args.test_type
         self.__project = args.project
+        self.__section = args.section
+        self.__unit = args.unit
 
     @property
     def test_type(self) -> TestingOptions:
@@ -51,6 +53,10 @@ class ArgsWrapper:
     @property
     def project(self) -> str | None:
         return self.__project
+
+    @property
+    def filters(self) -> dict[str, dict]:
+        return {"section_filter": self.__section, "unit_filter": self.__unit}
 
 
 def getArguments(*args: str) -> ArgsWrapper:
@@ -83,6 +89,20 @@ def getArguments(*args: str) -> ArgsWrapper:
         help="Run a specific project VERSION. If ommited, newest is used."
     )
 
+    filter_group = arg_parser.add_mutually_exclusive_group()
+    filter_group.add_argument(
+        "-s",
+        "--section",
+        nargs="+",
+        help="Filter by a specific set of sections."
+    )
+    filter_group.add_argument(
+        "-u",
+        "--unit",
+        nargs="+",
+        help="Filter by a specific set of units."
+    )
+
     if len(args) > 0:
         p_args = arg_parser.parse_args(list(args))
     else:
@@ -90,5 +110,7 @@ def getArguments(*args: str) -> ArgsWrapper:
 
     p_args.test_type = TestingOptions(p_args.test_type[0])
     p_args.project = p_args.project[0] if p_args.project else p_args.project
+    p_args.section = set(p_args.section) if p_args.section else set()
+    p_args.unit = set(p_args.unit) if p_args.unit else set()
 
     return ArgsWrapper(p_args)

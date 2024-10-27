@@ -86,10 +86,12 @@ class TesterBase:
     ERROR_OUTPUT = "error"
     TAB = "  "
 
-    def __init__(self, test_path: str, callback, *args):
-        self.callback = callback
-        self.arguments = args
-        self.sections = self.blank_section()
+    def __init__(self, test_path: str, callback, **kwargs):
+        self.__callback = callback
+        self.__kwargs = kwargs
+        self.__ttree: dict[str, dict[str, dict[str, dict[str, list[str]]]]] = dict()
+        self.__test_path = test_path
+        self.__key_map = []
 
         state = None
         whitelist = re.compile(r"^$|\*[\w ]+\*|^>")
@@ -106,11 +108,54 @@ class TesterBase:
 
                 state = self.advance_fsm(state, line)
 
+    def callback(self, prog_arg: str):
+        if len(self.__kwargs):
+            return self.__callback(prog_arg, **self.__kwargs)
+        else:
+            return self.__callback(prog_arg)
+
     def blank_section(self):
         return {"code": [], "stdin": [], "stdout": [], "error": []}
 
-    def run_section(self):
+    def validate_uniqueness(self, item: dict, key: str):
+        if key in item:
+            nice_path = os.path.relpath(self.__test_path)
+            raise SystemExit(f"`{key}' is a duplicate entry in {nice_path}")
+
+    def add_level(self, active_item: dict, key: str, payload):
+        self.validate_uniqueness(active_item, key)
+        active_item[key] = payload
+        self.__key_map.append(active_item[key])
+
+    def add_item(self, active_item: dict, key: str, payload):
+        self.validate_uniqueness(active_item, key)
+        active_item[key] = payload
+
+    def run_section(self, unit: dict[str, list[str]]):
         raise NotImplementedError("print_report must be derived")
+
+    def run_tests(self, section_filter: set[str] = set(), unit_filter: set[str] = set()):
+        print_buffer: list[str] = []
+
+        for name, title in self.__ttree.items():
+            print_buffer.append(name)
+            for name, section in title.items():
+                has_children = False
+                print_buffer.append(name)
+                if len(section_filter) > 0 and name not in section_filter:
+                    print_buffer.pop()
+                    continue
+                for name, unit in section.items():
+                    print_buffer.append(name)
+                    if len(unit_filter) > 0 and name not in unit_filter:
+                        print_buffer.pop()
+                        continue
+                    has_children = True
+                    print("\n".join(print_buffer))
+                    self.run_section(unit)
+                    print_buffer.clear()
+                if not has_children:
+                    print_buffer.pop()
 
     def update_sections(self, state, line):
         if line == "```":
@@ -118,10 +163,7 @@ class TesterBase:
 
         match state:
             case "code" | "stdin" | "stdout" | "error":
-                if state not in self.sections:
-                    self.sections[state] = [line]
-                else:
-                    self.sections[state].append(line)
+                self.__key_map[-1][state].append(line)
                 return True
 
             case _:
@@ -153,24 +195,51 @@ class TesterBase:
                 f"Incorrectly formatted test cases. It failed at:" + f"`{line}'"
             )
 
-        match state:
-            case "title" | "section" | "unit":
-                print(line)
-                self.sections = self.blank_section()
-            case "error-end":
-                self.run_section()
+        match state, entry_state:
+            case "title", None:
+                self.__ttree[line] = dict()
+                self.__key_map.append(self.__ttree[line])
+
+            case ("section", "title") | ("unit", "section"):
+                self.add_level(self.__key_map[-1], line, dict())
+
+            case "section", "error-end":
+                self.__key_map.pop()
+                self.__key_map.pop()
+                self.add_level(self.__key_map[-1], line, dict())
+
+            case "unit", "error-end":
+                self.__key_map.pop()
+                self.add_level(self.__key_map[-1], line, dict())
+
+            case ("code", _) | ("stdin", _) | ("stdout", _) | ("error", _):
+                self.add_item(self.__key_map[-1], state, [])
+
+            case (
+                ("code-end", _)
+                | ("stdin-end", _)
+                | ("stdout-end", _)
+                | ("error-end", _)
+            ):
+                pass
+
+            case _:
+                raise SyntaxError(
+                    f"Fatal error at:" + f"`{line}'.\nInvalid state transition."
+                )
+                # self.run_section()
 
         return state
 
 
 class Tester(TesterBase):
-    def __init__(self, proj_path, test_path: str, callback, *args):
+    def __init__(self, proj_path, test_path: str, callback, **kwargs):
         self.result = TestResults(proj_path, test_path)
-        super().__init__(test_path, callback, *args)
+        super().__init__(test_path, callback, **kwargs)
 
-    def run_section(self):
-        program_source = "\n".join(self.sections[TesterBase.CODE])
-        user_input = self.sections[TesterBase.USER_INPUT]
+    def run_section(self, unit: dict[str, list[str]]):
+        program_source = "\n".join(unit[TesterBase.CODE])
+        user_input = unit[TesterBase.USER_INPUT]
         error_definition = None
 
         with patch("builtins.input", side_effect=user_input):
@@ -193,26 +262,26 @@ class Tester(TesterBase):
 
         print()
         out_passed = self.match_buffer(
-            stdout_buff.getvalue(), TesterBase.PROG_OUTPUT, "stdout"
+            stdout_buff.getvalue(), unit[TesterBase.PROG_OUTPUT], "stdout"
         )
         err_passed = self.match_buffer(
-            stderr_buff.getvalue(), TesterBase.ERROR_OUTPUT, "stderr"
+            stderr_buff.getvalue(), unit[TesterBase.ERROR_OUTPUT], "stderr"
         )
         self.result.add_entry(out_passed and err_passed)
         if error_definition and not err_passed:
             print(f"    {TesterBase.TAB}{error_definition}")
         print()
 
-    def match_buffer(self, recieved: str, tag: str, msg: str):
+    def match_buffer(self, recieved: str, unit_block: list[str], msg: str):
         if recieved.endswith("\n"):
             recieved = recieved[:-1]
 
-        expected = "\n".join(self.sections[tag])
+        expected = "\n".join(unit_block)
         if recieved == expected:
-            print(f"{msg}: pass ✔")
+            print(f"- {msg}: pass ✔")
             return True
         else:
-            print(f"{msg}: FAIL ❌")
+            print(f"- {msg}: FAIL ❌")
             diff = list(difflib.ndiff(recieved.splitlines(), expected.splitlines()))
             rec_str = {
                 i: f"{TesterBase.TAB}[R]: {l[2:]}"
@@ -229,13 +298,13 @@ class Tester(TesterBase):
 
 
 class BatchRun(TesterBase):
-    def __init__(self, proj_path, test_path: str, callback, *args):
+    def __init__(self, proj_path, test_path: str, callback, **kwargs):
         self.result = ProfilerStats(proj_path, test_path)
-        super().__init__(test_path, callback, *args)
+        super().__init__(test_path, callback, **kwargs)
 
-    def run_section(self):
-        program_source = "\n".join(self.sections[TesterBase.CODE])
-        user_input = self.sections[TesterBase.USER_INPUT]
+    def run_section(self, unit: dict[str, list[str]]):
+        program_source = "\n".join(unit[TesterBase.CODE])
+        user_input = unit[TesterBase.USER_INPUT]
 
         with patch("builtins.input", side_effect=user_input):
             print("```")
@@ -248,4 +317,4 @@ class BatchRun(TesterBase):
                 print(error_message, file=sys.stderr)
             finally:
                 self.result.record()
-            print("```")
+            print("```\n")

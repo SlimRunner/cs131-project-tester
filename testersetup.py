@@ -76,6 +76,7 @@ def choose_project(
     # valid_interpreters[0].testsuite narrowed from (str | None) to (str)
     test_path = interpreters[proj_version].testsuite_path
     proj_path = interpreters[proj_version].interpreter_path
+    print("Running interpreter version", interpreters[proj_version].version, "\n")
     return Interpreter, proj_path, test_path
 
 
