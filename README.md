@@ -1,9 +1,11 @@
 Index
 -
 - [CS 131 Fall 2024: Project Starter](#cs-131-fall-2024-project-starter)
+  - [Setup](#setup)
   - [Requirements](#requirements)
   - [Usage](#usage)
   - [Test Case Formatting](#test-case-formatting)
+  - [Scorer Output](#scorer-output)
   - [Licensing and Attribution](#licensing-and-attribution)
 
 # CS 131 Fall 2024: Project Tester
