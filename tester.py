@@ -91,7 +91,7 @@ class TesterBase:
         return {"code": [], "stdin": [], "stdout": [], "error": []}
 
     def run_section(self):
-        pass
+        raise NotImplementedError("print_report must be derived")
 
     def update_sections(self, state, line):
         if line == "```":
