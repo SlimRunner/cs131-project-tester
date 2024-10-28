@@ -34,7 +34,7 @@ Also, it only depends on standard libraries and _your_ project files, so you do 
 Add a project to the root of this repo. The program automatically seeks all files named `interpreterv#.py` and `testsuitev#.md` where `#` can be any number (including zero padded numbers). If you pass no flags, the command will run the project with the highest version that has **both an interpreter and a testsuite** and it will run in testing mode. If you want to change the behavior of how it starts up, `main.py` was made as simple as possible to make editing it easy.
 
 ### Default
-The highest (lexicographically sorted) version will be run, and the project will be run in test mode.
+The highest (lexicographically sorted) version will be run, and the project will be run in test mode. Also, it will show only the test case that fail.
 
 #### Example
 ```sh
@@ -66,6 +66,14 @@ python ./main.py -s "variables" "functions"
 python ./main.py -u "simple loop" "call to print"
 ```
 
+### Verbose
+The `-v` flag allows to print all the sections including the ones that passed. The hidden cases still count towards the total unlike with filtering. 
+#### Example
+
+```sh
+python ./main.py -v
+```
+
 ### Help
 The `-h` flag shows extended information about each flag.
 ```
@@ -73,7 +81,7 @@ python ./main.py -h
 ```
 
 ## Test Case Formatting
-I used a rather makeshift unit tester. It essentially lets you write your Brewin code in a markdown file (i.e. [testsuitev2.md](./testsuitev2.md)). Its benefits are that since Brewin is pretty similar to Go, you get syntax highlighting for free in code blocks.
+The tester lets you write your Brewin code in a markdown file (i.e. [testsuitev2.md](./testsuitev2.md)). Its benefits are that since Brewin is pretty similar to Go, you get syntax highlighting for free in code blocks.
 
 The markdown file is formatted as follows
 ```md
@@ -128,22 +136,36 @@ The output of the scorer may look like this:
 ```
 # Unit Tests
 ## Control Flow
-### If-Statement Shadowing
+### Test Diff
 
 - stdout: FAIL ❌
-  - `e`: 7
-  - `R`: 5
-  - `R`: foo
-  - `e`: foo
+
+  | # | received | expected | # |
+  | - | -------- | -------- | - |
+  | . |          | l        | 1 |
+  | . |          | o        | 2 |
+  | . |          | g        | 3 |
+  | 1 | a        | a        | 4 |
+  | 2 | l        |          | . |
+  | 3 | g        |          | . |
+  | 4 | o        |          | . |
+  | 5 | r        | r        | 5 |
+  | 6 | i        | i        | 6 |
+  | 7 | t        | t        | 7 |
+  | 8 | h        | h        | 8 |
+
 - stderr: FAIL ❌
-  - `R`: ErrorType.NAME_ERROR
-         Variable a defined more than once
+
+  | # | received | expected             | # |
+  | - | -------- | -------------------- | - |
+  | . |          | ErrorType.NAME_ERROR | 1 |
+
 ```
 It is formatted in such a way that it can look good in markdown if you wanted to redirect the output to a markdown file to inspect it more easily.
 
-What this is telling you is that both stdout and stderr failed to match the expected output. They have to both succeed for the snippet to count as passed. The `e` means that such line _was_ **e**xpected. An `R` means that such line was **R**eceived (and not expected). The letter `e` will appear before `R` if the latter was received but doesn't match the former. Any other order means the pair is unrelated, and either nothing was received or nothing was expected. This output comes from a diff between the program output and the expected output.
+This output comes from Python's difflib so it is a diff between the program output and the expected output. Shows the line numbers of both the recieved and expected output. That library may sometimes ignore certain lines if the diff is large enough, but it gives you a rough idea of what is going wrong.
 
-In the example above you would navigate to the section named `If-Statement Shadowing` in the appropriate `testsuite` file to see the snippet that generated the error.
+In the example above you would navigate to the unit named `Test Diff` in the appropriate `testsuite` file to see the snippet that generated the error.
 
 ## Licensing and Attribution
 
