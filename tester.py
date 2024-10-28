@@ -145,9 +145,7 @@ class TesterBase:
         key = remove_hash.sub("", key).lower()
         return key not in filter
 
-    def run_tests(
-        self, section_filter: set[str], unit_filter: set[str], verbose: bool
-    ):
+    def run_tests(self, section_filter: set[str], unit_filter: set[str], verbose: bool):
         print_buffer: list[str] = []
         section_filter = {i.lower() for i in section_filter}
         unit_filter = {i.lower() for i in unit_filter}
@@ -318,7 +316,9 @@ class Tester(TesterBase):
         for tag, i1, i2, j1, j2 in s.get_opcodes():
             match tag:
                 case "insert":
-                    diff_table.extend([(dot, "", b[e], f"{e+1:0{num_pad}}") for e in range(j1, j2)])
+                    diff_table.extend(
+                        [(dot, "", b[e], f"{e+1:0{num_pad}}") for e in range(j1, j2)]
+                    )
                 case "delete":
                     diff_table.extend(
                         [(f"{e+1:0{num_pad}}", a[e], "", dot) for e in range(i1, i2)]
@@ -333,7 +333,6 @@ class Tester(TesterBase):
                 case "equal":
                     pass
 
-
         col_span = [0, 0, 0, 0]
         for row in diff_table:
             for i, c in enumerate(row):
@@ -345,7 +344,9 @@ class Tester(TesterBase):
         str_out = [""]
 
         for r1, r2, r3, r4 in diff_table:
-            str_out.append(f"{TesterBase.TAB}| {r1:<{l1}} | {r2:<{l2}} | {r3:<{l3}} | {r4:<{l4}} |")
+            str_out.append(
+                f"{TesterBase.TAB}| {r1:<{l1}} | {r2:<{l2}} | {r3:<{l3}} | {r4:<{l4}} |"
+            )
         str_out.append("")
 
         return str_out
@@ -396,7 +397,6 @@ class BatchRun(TesterBase):
                 self.result.record()
             print("```")
             sys.stdout = sys.__stdout__
-            sys.stderr = sys.__stderr__
 
         prog_out.append(self.trim_output(stdout_buff.getvalue()))
         prog_out.append("")
