@@ -45,6 +45,7 @@ class ArgsWrapper:
         self.__project = args.project
         self.__section = args.section
         self.__unit = args.unit
+        self.__verbose = args.verbose
 
     @property
     def test_type(self) -> TestingOptions:
@@ -53,6 +54,10 @@ class ArgsWrapper:
     @property
     def project(self) -> str | None:
         return self.__project
+
+    @property
+    def verbose(self) -> str | None:
+        return self.__verbose
 
     @property
     def filters(self) -> dict[str, dict]:
@@ -87,6 +92,12 @@ def getArguments(*args: str) -> ArgsWrapper:
         type=strVersion,
         metavar="VERSION",
         help="Run a specific project VERSION. If ommited, newest is used.",
+    )
+    arg_parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="If present testing mode will show the passed cases too.",
     )
 
     filter_group = arg_parser.add_mutually_exclusive_group()

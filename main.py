@@ -14,7 +14,7 @@ def main(Interpreter: type, proj_path: str, test_path: str, args: ArgsWrapper):
         case _:
             raise SystemExit(f"Unexpected test type: {args.test_type}")
 
-    tester.run_tests(**args.filters)
+    tester.run_tests(**args.filters, verbose=args.verbose)
     tester.result.print_report()
 
 

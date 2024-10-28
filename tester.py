@@ -134,7 +134,7 @@ class TesterBase:
         self.validate_uniqueness(active_item, key)
         active_item[key] = payload
 
-    def run_section(self, unit: dict[str, list[str]]) -> list[str]:
+    def run_section(self, unit: dict[str, list[str]]) -> tuple[bool, list[str]]:
         raise NotImplementedError("print_report must be derived")
 
     def is_filtered(self, key: str, filter: set[str]):
@@ -145,7 +145,7 @@ class TesterBase:
         return key not in filter
 
     def run_tests(
-        self, section_filter: set[str] = set(), unit_filter: set[str] = set()
+        self, section_filter: set[str], unit_filter: set[str], verbose: bool
     ):
         print_buffer: list[str] = []
         section_filter = {i.lower() for i in section_filter}
@@ -156,20 +156,30 @@ class TesterBase:
             for name, section in title.items():
                 has_children = False
                 print_buffer.append(name)
+
                 if self.is_filtered(name, section_filter):
                     print_buffer.pop()
                     continue
+
                 for name, unit in section.items():
-                    print_buffer.append(name)
                     if self.is_filtered(name, unit_filter):
-                        print_buffer.pop()
                         continue
+
+                    passed, msg = self.run_section(unit)
+
+                    if passed and not verbose:
+                        continue
+
+                    print_buffer.append(name)
                     has_children = True
-                    print_buffer.extend(self.run_section(unit))
+                    print_buffer.extend(msg)
+
                 if not has_children:
                     print_buffer.pop()
+
         if print_buffer[-1] == "":
             print_buffer.pop()
+
         print("\n".join(print_buffer))
 
     def update_sections(self, state, line):
@@ -283,15 +293,17 @@ class Tester(TesterBase):
         err_passed, err_msg = self.match_buffer(
             stderr_buff.getvalue(), unit[TesterBase.ERROR_OUTPUT], "stderr"
         )
-        self.result.add_entry(out_passed and err_passed)
-        if True or (out_passed and err_passed):
-            prog_out.extend(out_msg)
-            prog_out.extend(err_msg)
+
+        unit_passed = out_passed and err_passed
+        self.result.add_entry(unit_passed)
+        prog_out.extend(out_msg)
+        prog_out.extend(err_msg)
+
         if error_definition and not err_passed:
             prog_out.append(f"{TesterBase.TAB*4}{error_definition}")
         prog_out.append("")
 
-        return prog_out
+        return (unit_passed, prog_out)
 
     def generate_md_table(self, a, b):
         s = difflib.SequenceMatcher(None, a, b)
@@ -386,4 +398,4 @@ class BatchRun(TesterBase):
         prog_out.append(self.trim_output(stdout_buff.getvalue()))
         prog_out.append("")
 
-        return prog_out
+        return (False, prog_out)
