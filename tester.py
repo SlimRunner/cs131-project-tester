@@ -101,15 +101,16 @@ class TesterBase:
 
         with open(test_path) as file:
             for line in file:
-                line = line.rstrip()
+                lnw = line.rstrip("\n")
+                lsp = line.rstrip()
 
-                if self.update_sections(state, line):
+                if self.update_sections(state, lnw):
                     continue
 
-                if whitelist.match(line):
+                if whitelist.match(lsp):
                     continue  # ignore line
 
-                state = self.advance_fsm(state, line)
+                state = self.advance_fsm(state, lnw)
 
     def callback(self, prog_arg: str):
         if len(self.__kwargs):
@@ -308,41 +309,43 @@ class Tester(TesterBase):
     def generate_md_table(self, a, b):
         s = difflib.SequenceMatcher(None, a, b)
         num_pad = len(str(len(a)))
-        diff_table: list[tuple[str, str, str]] = [
-            (f"{'#':>{num_pad}}", "received", "expected")
+        diff_table: list[tuple[str, str, str, str]] = [
+            (f"{'#':>{num_pad}}", "received", "expected", "#")
         ]
+        dot = f"{'.': >{num_pad}}"
 
         # Adapted from https://docs.python.org/3/library/difflib.html#difflib.SequenceMatcher.get_opcodes
         for tag, i1, i2, j1, j2 in s.get_opcodes():
             match tag:
                 case "insert":
-                    diff_table.extend([(".", "", b[e]) for e in range(j1, j2)])
+                    diff_table.extend([(dot, "", b[e], f"{e+1:0{num_pad}}") for e in range(j1, j2)])
                 case "delete":
                     diff_table.extend(
-                        [(f"{e:0{num_pad}}", a[e], "") for e in range(i1, i2)]
+                        [(f"{e+1:0{num_pad}}", a[e], "", dot) for e in range(i1, i2)]
                     )
                 case "replace":
                     diff_table.extend(
                         [
-                            (f"{e1:0{num_pad}}", a[e1], b[e2])
+                            (f"{e1+1:0{num_pad}}", a[e1], b[e2], f"{e2+1:0{num_pad}}")
                             for e1, e2 in zip(range(i1, i2), range(j1, j2))
                         ]
                     )
                 case "equal":
                     pass
 
-        col_span = [0, 0, 0]
+
+        col_span = [0, 0, 0, 0]
         for row in diff_table:
             for i, c in enumerate(row):
                 col_span[i] = max(len(c), col_span[i])
 
-        l1, l2, l3 = col_span
-        diff_table.insert(1, ("-" * l1, "-" * l2, "-" * l3))
+        l1, l2, l3, l4 = col_span
+        diff_table.insert(1, ("-" * l1, "-" * l2, "-" * l3, "-" * l4))
 
         str_out = [""]
 
-        for r1, r2, r3 in diff_table:
-            str_out.append(f"{TesterBase.TAB}| {r1:<{l1}} | {r2:<{l2}} | {r3:<{l3}} |")
+        for r1, r2, r3, r4 in diff_table:
+            str_out.append(f"{TesterBase.TAB}| {r1:<{l1}} | {r2:<{l2}} | {r3:<{l3}} | {r4:<{l4}} |")
         str_out.append("")
 
         return str_out
