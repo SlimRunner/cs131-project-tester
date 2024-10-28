@@ -67,7 +67,10 @@ class ProfilerStats(PrintableReport):
         return sum(self.__records)
 
     def average_time(self):
-        return self.total_time() / len(self.__records)
+        if len(self.__records):
+            return self.total_time() / len(self.__records)
+        else:
+            return float("NaN")
 
     def print_report(self):
         COLSIZE = 14
