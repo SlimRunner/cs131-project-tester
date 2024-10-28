@@ -131,7 +131,7 @@ class TesterBase:
         self.validate_uniqueness(active_item, key)
         active_item[key] = payload
 
-    def run_section(self, unit: dict[str, list[str]]):
+    def run_section(self, unit: dict[str, list[str]]) -> list[str]:
         raise NotImplementedError("print_report must be derived")
 
     def is_filtered(self, key: str, filter: set[str]):
@@ -162,11 +162,12 @@ class TesterBase:
                         print_buffer.pop()
                         continue
                     has_children = True
-                    print("\n".join(print_buffer))
-                    self.run_section(unit)
-                    print_buffer.clear()
+                    print_buffer.extend(self.run_section(unit))
                 if not has_children:
                     print_buffer.pop()
+        if print_buffer[-1] == "":
+            print_buffer.pop()
+        print("\n".join(print_buffer))
 
     def update_sections(self, state, line):
         if line == "```":
@@ -245,8 +246,8 @@ class TesterBase:
 
 class Tester(TesterBase):
     def __init__(self, proj_path, test_path: str, callback, **kwargs):
-        self.result = TestResults(proj_path, test_path)
         super().__init__(test_path, callback, **kwargs)
+        self.result = TestResults(proj_path, test_path)
 
     def run_section(self, unit: dict[str, list[str]]):
         program_source = "\n".join(unit[TesterBase.CODE])
@@ -258,6 +259,7 @@ class Tester(TesterBase):
             stderr_buff = io.StringIO()
             sys.stdout = stdout_buff
             sys.stderr = stderr_buff
+
             try:
                 self.callback(program_source)
 
@@ -271,53 +273,99 @@ class Tester(TesterBase):
             sys.stdout = sys.__stdout__
             sys.stderr = sys.__stderr__
 
-        print()
-        out_passed = self.match_buffer(
+        prog_out = [""]
+        out_passed, out_msg = self.match_buffer(
             stdout_buff.getvalue(), unit[TesterBase.PROG_OUTPUT], "stdout"
         )
-        err_passed = self.match_buffer(
+        err_passed, err_msg = self.match_buffer(
             stderr_buff.getvalue(), unit[TesterBase.ERROR_OUTPUT], "stderr"
         )
         self.result.add_entry(out_passed and err_passed)
+        if True or (out_passed and err_passed):
+            prog_out.extend(out_msg)
+            prog_out.extend(err_msg)
         if error_definition and not err_passed:
-            print(f"{TesterBase.TAB*4}{error_definition}")
-        print()
+            prog_out.append(f"{TesterBase.TAB*4}{error_definition}")
+        prog_out.append("")
 
-    def match_buffer(self, recieved: str, unit_block: list[str], msg: str):
-        if recieved.endswith("\n"):
-            recieved = recieved[:-1]
+        return prog_out
+
+    def generate_md_table(self, a, b):
+        s = difflib.SequenceMatcher(None, a, b)
+        num_pad = len(str(len(a)))
+        diff_table: list[tuple[str, str, str]] = [
+            (f"{'#':>{num_pad}}", "received", "expected")
+        ]
+
+        # Adapted from https://docs.python.org/3/library/difflib.html#difflib.SequenceMatcher.get_opcodes
+        for tag, i1, i2, j1, j2 in s.get_opcodes():
+            match tag:
+                case "insert":
+                    diff_table.extend([(".", "", b[e]) for e in range(j1, j2)])
+                case "delete":
+                    diff_table.extend(
+                        [(f"{e:0{num_pad}}", a[e], "") for e in range(i1, i2)]
+                    )
+                case "replace":
+                    diff_table.extend(
+                        [
+                            (f"{e1:0{num_pad}}", a[e1], b[e2])
+                            for e1, e2 in zip(range(i1, i2), range(j1, j2))
+                        ]
+                    )
+                case "equal":
+                    pass
+
+        col_span = [0, 0, 0]
+        for row in diff_table:
+            for i, c in enumerate(row):
+                col_span[i] = max(len(c), col_span[i])
+
+        l1, l2, l3 = col_span
+        diff_table.insert(1, ("-" * l1, "-" * l2, "-" * l3))
+
+        str_out = [""]
+
+        for r1, r2, r3 in diff_table:
+            str_out.append(f"{TesterBase.TAB}| {r1:<{l1}} | {r2:<{l2}} | {r3:<{l3}} |")
+        str_out.append("")
+
+        return str_out
+
+    def match_buffer(self, received: str, unit_block: list[str], msg: str):
+        if received.endswith("\n"):
+            received = received[:-1]
 
         expected = "\n".join(unit_block)
-        if recieved == expected:
-            print(f"- {msg}: pass ✔")
-            return True
+        if received == expected:
+            return (True, [f"- {msg}: pass ✔"])
         else:
-            print(f"- {msg}: FAIL ❌")
-            diff = list(difflib.ndiff(recieved.splitlines(), expected.splitlines()))
-            rec_str = {
-                i: f"{TesterBase.TAB}- `R`: {l[2:]}"
-                for i, l in enumerate(diff)
-                if l.startswith("-")
-            }
-            exp_str = {
-                i: f"{TesterBase.TAB}- `e`: {l[2:]}"
-                for i, l in enumerate(diff)
-                if l.startswith("+")
-            }
-            print("\n".join([i for _, i in sorted((rec_str | exp_str).items())]))
-            return False
+            out_msg = [f"- {msg}: FAIL ❌"]
+            diff_table = self.generate_md_table(
+                received.splitlines(), expected.splitlines()
+            )
+            return (False, out_msg + diff_table)
 
 
 class BatchRun(TesterBase):
     def __init__(self, proj_path, test_path: str, callback, **kwargs):
-        self.result = ProfilerStats(proj_path, test_path)
         super().__init__(test_path, callback, **kwargs)
+        self.result = ProfilerStats(proj_path, test_path)
+
+    def trim_output(self, received: str):
+        if received.endswith("\n"):
+            received = received[:-1]
+        return received
 
     def run_section(self, unit: dict[str, list[str]]):
         program_source = "\n".join(unit[TesterBase.CODE])
         user_input = unit[TesterBase.USER_INPUT]
+        prog_out: list[str] = []
 
         with patch("builtins.input", side_effect=user_input):
+            stdout_buff = io.StringIO()
+            sys.stdout = stdout_buff
+
             print("```")
             try:
                 self.result.start()
@@ -325,7 +373,14 @@ class BatchRun(TesterBase):
 
             except Exception as e:
                 error_message = e.args[0]
-                print(error_message, file=sys.stderr)
+                print(error_message)
             finally:
                 self.result.record()
-            print("```\n")
+            print("```")
+            sys.stdout = sys.__stdout__
+            sys.stderr = sys.__stderr__
+
+        prog_out.append(self.trim_output(stdout_buff.getvalue()))
+        prog_out.append("")
+
+        return prog_out
