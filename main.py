@@ -1,6 +1,6 @@
 from tester import Tester, BatchRun
 from arghelper import getArguments, TestingOptions, ArgsWrapper
-from testersetup import find_interpreters, choose_project, choose_latest_project
+from testersetup import find_projects, choose_project, choose_latest_project
 
 
 def main(Interpreter: type, proj_path: str, test_path: str, args: ArgsWrapper):
@@ -20,16 +20,16 @@ def main(Interpreter: type, proj_path: str, test_path: str, args: ArgsWrapper):
 
 if __name__ == "__main__":
     args = getArguments()
-    interpreters = find_interpreters()
+    projects = find_projects()
     TARGET_MODULE = "Interpreter"
 
     if args.project:
         Interpreter, proj_path, test_path = choose_project(
-            args.project, interpreters, TARGET_MODULE
+            args.project, projects, TARGET_MODULE
         )
     else:
         Interpreter, proj_path, test_path = choose_latest_project(
-            interpreters, TARGET_MODULE
+            projects, TARGET_MODULE
         )
 
     if Interpreter is None:

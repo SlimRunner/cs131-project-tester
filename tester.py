@@ -136,7 +136,7 @@ class TesterBase:
         active_item[key] = payload
 
     def run_section(self, unit: dict[str, list[str]]) -> tuple[bool, list[str]]:
-        raise NotImplementedError("print_report must be derived")
+        raise NotImplementedError("run_section must be derived")
 
     def is_filtered(self, key: str, filter: set[str]):
         if len(filter) == 0:
@@ -299,14 +299,14 @@ class Tester(TesterBase):
         prog_out.extend(err_msg)
 
         if error_definition and not err_passed:
-            prog_out.append(f"{TesterBase.TAB*4}{error_definition}")
+            prog_out.append(f"{TesterBase.TAB}- {error_definition}")
         prog_out.append("")
 
         return (unit_passed, prog_out)
 
-    def generate_md_table(self, a, b):
-        s = difflib.SequenceMatcher(None, a, b)
-        num_pad = len(str(len(a)))
+    def generate_md_table(self, out_a: list[str], out_b: list[str]):
+        s = difflib.SequenceMatcher(None, out_a, out_b)
+        num_pad = len(str(len(out_a)))
         diff_table: list[tuple[str, str, str, str]] = [
             (f"{'#':>{num_pad}}", "received", "expected", "#")
         ]
@@ -317,16 +317,16 @@ class Tester(TesterBase):
             match tag:
                 case "insert":
                     diff_table.extend(
-                        [(dot, "", b[e], f"{e+1:0{num_pad}}") for e in range(j1, j2)]
+                        [(dot, "", out_b[e], f"{e+1:0{num_pad}}") for e in range(j1, j2)]
                     )
                 case "delete":
                     diff_table.extend(
-                        [(f"{e+1:0{num_pad}}", a[e], "", dot) for e in range(i1, i2)]
+                        [(f"{e+1:0{num_pad}}", out_a[e], "", dot) for e in range(i1, i2)]
                     )
                 case "replace":
                     diff_table.extend(
                         [
-                            (f"{e1+1:0{num_pad}}", a[e1], b[e2], f"{e2+1:0{num_pad}}")
+                            (f"{e1+1:0{num_pad}}", out_a[e1], out_b[e2], f"{e2+1:0{num_pad}}")
                             for e1, e2 in zip(range(i1, i2), range(j1, j2))
                         ]
                     )

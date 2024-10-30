@@ -44,7 +44,7 @@ def load_module(name: str, pckg: str) -> type | None:
         return None
 
 
-def find_interpreters() -> dict[str, ProjectEntry]:
+def find_projects() -> dict[str, ProjectEntry]:
     proj_root = os.path.abspath("./")
     suites_regex = r"^(testsuitev(?=\d+\.md)|interpreterv(?=\d+\.py))(\d+)(\.md|\.py)$"
     suites_regex = re.compile(suites_regex)
@@ -64,37 +64,37 @@ def find_interpreters() -> dict[str, ProjectEntry]:
 
 
 def choose_project(
-    proj_version: str, interpreters: dict[str, ProjectEntry], target_module: str
+    proj_version: str, projects: dict[str, ProjectEntry], target_module: str
 ):
-    if proj_version not in interpreters:
+    if proj_version not in projects:
         raise SystemExit(f"There is no project version {proj_version}.")
-    elif not interpreters[proj_version].is_valid():
+    elif not projects[proj_version].is_valid():
         raise SystemExit(
-            f"Project version {proj_version} is missing {interpreters[proj_version].what_is_missing()}."
+            f"Project version {proj_version} is missing {projects[proj_version].what_is_missing()}."
         )
-    Interpreter = load_module(interpreters[proj_version].interpreter, target_module)
-    # valid_interpreters[0].testsuite narrowed from (str | None) to (str)
-    test_path = interpreters[proj_version].testsuite_path
-    proj_path = interpreters[proj_version].interpreter_path
-    print("Running interpreter version", interpreters[proj_version].version, "\n")
+    Interpreter = load_module(projects[proj_version].interpreter, target_module)
+    # the two below have been narrowed from str | None to str
+    test_path: str = projects[proj_version].testsuite_path
+    proj_path: str = projects[proj_version].interpreter_path
+    print("Running interpreter version", projects[proj_version].version, "\n")
     return Interpreter, proj_path, test_path
 
 
-def choose_latest_project(interpreters: dict[str, ProjectEntry], target_module: str):
-    sorted_interpreters = [
-        entry for _, entry in sorted(interpreters.items(), reverse=True)
+def choose_latest_project(projects: dict[str, ProjectEntry], target_module: str):
+    sorted_projects = [
+        entry for _, entry in sorted(projects.items(), reverse=True)
     ]
-    valid_interpreters = [entry for entry in sorted_interpreters if entry.is_valid()]
-    if not len(interpreters):
+    valid_projects = [entry for entry in sorted_projects if entry.is_valid()]
+    if not len(projects):
         raise SystemExit("There are no projects available in the root directory.")
-    elif not len(valid_interpreters):
+    elif not len(valid_projects):
         raise SystemExit(
             "There are no projects with both an interpreter and testsuite."
         )
 
-    Interpreter = load_module(valid_interpreters[0].interpreter, target_module)
-    # valid_interpreters[0].testsuite narrowed from (str | None) to (str)
-    test_path = valid_interpreters[0].testsuite_path
-    proj_path = valid_interpreters[0].interpreter_path
-    print("Running interpreter version", valid_interpreters[0].version, "\n")
+    Interpreter = load_module(valid_projects[0].interpreter, target_module)
+    # the two below have been narrowed from str | None to str
+    test_path: str = valid_projects[0].testsuite_path
+    proj_path: str = valid_projects[0].interpreter_path
+    print("Running interpreter version", valid_projects[0].version, "\n")
     return Interpreter, proj_path, test_path
