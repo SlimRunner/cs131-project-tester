@@ -317,16 +317,27 @@ class Tester(TesterBase):
             match tag:
                 case "insert":
                     diff_table.extend(
-                        [(dot, "", out_b[e], f"{e+1:0{num_pad}}") for e in range(j1, j2)]
+                        [
+                            (dot, "", out_b[e], f"{e+1:0{num_pad}}")
+                            for e in range(j1, j2)
+                        ]
                     )
                 case "delete":
                     diff_table.extend(
-                        [(f"{e+1:0{num_pad}}", out_a[e], "", dot) for e in range(i1, i2)]
+                        [
+                            (f"{e+1:0{num_pad}}", out_a[e], "", dot)
+                            for e in range(i1, i2)
+                        ]
                     )
                 case "replace":
                     diff_table.extend(
                         [
-                            (f"{e1+1:0{num_pad}}", out_a[e1], out_b[e2], f"{e2+1:0{num_pad}}")
+                            (
+                                f"{e1+1:0{num_pad}}",
+                                out_a[e1],
+                                out_b[e2],
+                                f"{e2+1:0{num_pad}}",
+                            )
                             for e1, e2 in zip(range(i1, i2), range(j1, j2))
                         ]
                     )
@@ -362,9 +373,7 @@ class Tester(TesterBase):
             out_msg = [f"- {msg}: FAIL ❌"]
             received = [f"`{l}`" for l in received.splitlines()]
             expected = [f"`{l}`" for l in expected.splitlines()]
-            diff_table = self.generate_md_table(
-                received, expected
-            )
+            diff_table = self.generate_md_table(received, expected)
             return (False, out_msg + diff_table)
 
 

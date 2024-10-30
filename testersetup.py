@@ -81,10 +81,10 @@ def choose_project(
 
 
 def choose_latest_project(projects: dict[str, ProjectEntry], target_module: str):
-    sorted_projects = [
-        entry for _, entry in sorted(projects.items(), reverse=True)
-    ]
-    at_least_one_interpreter = any(entry for entry in sorted_projects if entry.interpreter)
+    sorted_projects = [entry for _, entry in sorted(projects.items(), reverse=True)]
+    at_least_one_interpreter = any(
+        entry for entry in sorted_projects if entry.interpreter
+    )
     valid_projects = [entry for entry in sorted_projects if entry.is_valid()]
     if not len(projects):
         raise SystemExit("There are no projects available in the root directory.")
