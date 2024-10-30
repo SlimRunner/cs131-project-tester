@@ -129,43 +129,87 @@ Fill in the code blocks as appropriate. **Also if you use VSCode I added a custo
 
 The tags such as `*code*` are optional and can contain any text you want, so long as they are enclosed in asterisks. Additionally, you may add remarks anywhere with `> ...`. These along with empty lines (or lines containing only spaces) **are ignored**. Any type of text anywhere will cause an error when parsing the test cases.
 
-> Note: the test cases in this repo are mostly my own with a few ones from the autograder. They are NOT exhaustive.
+> Note: the test cases in this repo are mostly my own with a few ones from the autograder. They are NOT exhaustive, and some entries test undefined behavior as per the spec (which I defined).
 
 ## Scorer Output
 The output of the scorer may look like this:
 ```
-# Unit Tests
-## Control Flow
-### Test Diff
+# Unit Tests V2
+## Error Format Test
+### Diff Test
 
 - stdout: FAIL ❌
 
-  | # | received | expected | # |
-  | - | -------- | -------- | - |
-  | . |          | l        | 1 |
-  | . |          | o        | 2 |
-  | . |          | g        | 3 |
-  | 1 | a        | a        | 4 |
-  | 2 | l        |          | . |
-  | 3 | g        |          | . |
-  | 4 | o        |          | . |
-  | 5 | r        | r        | 5 |
-  | 6 | i        | i        | 6 |
-  | 7 | t        | t        | 7 |
-  | 8 | h        | h        | 8 |
+  |  # | received | expected | #  |
+  | -- | -------- | -------- | -- |
+  | 01 | `asd`    | `qwe`    | 01 |
+  | 02 | ``       | `l`      | 02 |
+  | 04 | `l`      |          |  . |
+  | 05 | `g`      |          |  . |
+  | 06 | `o`      |          |  . |
+  | 11 | `m`      | `n`      | 10 |
 
 - stderr: FAIL ❌
 
-  | # | received | expected             | # |
-  | - | -------- | -------------------- | - |
-  | . |          | ErrorType.NAME_ERROR | 1 |
+  | # | received               | expected               | # |
+  | - | ---------------------- | ---------------------- | - |
+  | 1 | `ErrorType.TYPE_ERROR` | `ErrorType.NAME_ERROR` | 1 |
 
+  -  if-statement condition must evaluate to boolean
 ```
 It is formatted in such a way that it can look good in markdown if you wanted to redirect the output to a markdown file to inspect it more easily.
 
-This output comes from Python's difflib so it is a diff between the program output and the expected output. Shows the line numbers of both the recieved and expected output. That library may sometimes ignore certain lines if the diff is large enough, but it gives you a rough idea of what is going wrong.
+You may notice some lines have back ticks. These help you differentiate if there was an empty line expected (\`\`). In general if there is a backticked message in both matching lines it means that received does not match expected. If either has a non-backticked message it means either recieved something extra or expected something that is not there. Also, if an error was emitted by the interpreter, the description will be put below. However, exact descriptions are _not_ matched. That is to keep the test easier to write.
 
-In the example above you would navigate to the unit named `Test Diff` in the appropriate `testsuite` file to see the snippet that generated the error.
+This diff report is generated with Python's difflib, so it is a diff between the program output and the expected output. Shows the line numbers of both the recieved and expected output. That library may sometimes generate diffs that are unintuitive if diff is large enough, but it gives you a rough idea of what is going wrong. It works fine for most errors.
+
+In the example above you would navigate to the unit test titled `Diff Test` in the appropriate `testsuite` file to see the snippet that generated the error. In this case this is the test that _purposefully_ generated this error:
+````md
+### Diff Test
+
+*code*
+```go
+func main() {
+  print("asd");
+  print();
+  print("a");
+  print("l");
+  print("g");
+  print("o");
+  print("r");
+  print("i");
+  print("t");
+  print("h");
+  print("m");
+  if (1) {
+    print();
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+qwe
+l
+o
+g
+a
+r
+i
+t
+h
+n
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+````
 
 ## Licensing and Attribution
 
