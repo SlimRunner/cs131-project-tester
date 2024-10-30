@@ -360,8 +360,10 @@ class Tester(TesterBase):
             return (True, [f"- {msg}: pass ✔"])
         else:
             out_msg = [f"- {msg}: FAIL ❌"]
+            received = [f"`{l}`" for l in received.splitlines()]
+            expected = [f"`{l}`" for l in expected.splitlines()]
             diff_table = self.generate_md_table(
-                received.splitlines(), expected.splitlines()
+                received, expected
             )
             return (False, out_msg + diff_table)
 
