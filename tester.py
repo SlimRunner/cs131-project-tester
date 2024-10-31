@@ -308,11 +308,13 @@ class Tester(TesterBase):
 
     def generate_md_table(self, out_a: list[str], out_b: list[str]):
         s = difflib.SequenceMatcher(None, out_a, out_b)
-        num_pad = len(str(len(out_a)))
+        num_pad_a = len(str(len(out_a)))
+        num_pad_b = len(str(len(out_b)))
         diff_table: list[tuple[str, str, str, str]] = [
-            (f"{'#':>{num_pad}}", "received", "expected", "#")
+            (f"{'#':>{num_pad_a}}", "received", "expected", f"{'#':>{num_pad_b}}")
         ]
-        dot = f"{'.': >{num_pad}}"
+        dot_a = f"{'.': >{num_pad_a}}"
+        dot_b = f"{'.': >{num_pad_b}}"
 
         # Adapted from https://docs.python.org/3/library/difflib.html#difflib.SequenceMatcher.get_opcodes
         for tag, i1, i2, j1, j2 in s.get_opcodes():
@@ -320,14 +322,14 @@ class Tester(TesterBase):
                 case "insert":
                     diff_table.extend(
                         [
-                            (dot, "", out_b[e], f"{e+1:0{num_pad}}")
+                            (dot_a, "", out_b[e], f"{e+1:0{num_pad_b}}")
                             for e in range(j1, j2)
                         ]
                     )
                 case "delete":
                     diff_table.extend(
                         [
-                            (f"{e+1:0{num_pad}}", out_a[e], "", dot)
+                            (f"{e+1:0{num_pad_a}}", out_a[e], "", dot_b)
                             for e in range(i1, i2)
                         ]
                     )
@@ -335,10 +337,10 @@ class Tester(TesterBase):
                     diff_table.extend(
                         [
                             (
-                                f"{e1+1:0{num_pad}}",
+                                f"{e1+1:0{num_pad_a}}",
                                 out_a[e1],
                                 out_b[e2],
-                                f"{e2+1:0{num_pad}}",
+                                f"{e2+1:0{num_pad_b}}",
                             )
                             for e1, e2 in zip(range(i1, i2), range(j1, j2))
                         ]
