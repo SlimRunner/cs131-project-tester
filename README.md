@@ -74,6 +74,17 @@ The `-v` flag allows to print all the sections including the ones that passed. T
 python ./main.py -v
 ```
 
+### Parameter Pass-Thru
+The `--args` flag allows passing parameters to the tester callback. In the case of this project that is `interpreter.run`. Since the call back does not allow to give parameters other than the program code, then this option allows to pass other such as the ones inherited from `InterpreterBase` or custom of your own.
+
+The parameters must be passed in sets of triples that contain (1) name of parameter, (2) type of parameter, and (3) value of parameter.
+
+#### Example
+The following command runs the interpreter with the custom argument `trace_output`:
+```sh
+python ./main.py --args trace_output bool True
+```
+
 ### Help
 The `-h` flag shows extended information about each flag.
 ```
