@@ -20,8 +20,10 @@ class PrintableReport:
     def module_name(self) -> str:
         return f"./{os.path.relpath(self.__proj_path)}"
 
-    def print_report():
-        raise NotImplementedError("print_report must be derived")
+    def print_report(self, report_lines: list[str]):
+        print()
+        print("-" * 40)
+        print("\n".join(f"* {l}" for l in report_lines))
 
 
 class TestResults(PrintableReport):
@@ -41,11 +43,11 @@ class TestResults(PrintableReport):
     def print_report(self):
         passed, total = self.give_score()
         COLSIZE = 8
-        print()
-        print("=" * 40)
-        print(f"{'module:':<{COLSIZE}}{self.module_name}")
-        print(f"{'suite:':<{COLSIZE}}{self.suite_name}")
-        print(f"{'score:':<{COLSIZE}}{passed}/{total}\n")
+        out_report = []
+        out_report.append(f"{'module:':<{COLSIZE}}{self.module_name}")
+        out_report.append(f"{'suite:':<{COLSIZE}}{self.suite_name}")
+        out_report.append(f"{'score:':<{COLSIZE}}{passed}/{total}\n")
+        super().print_report(out_report)
 
 
 class ProfilerStats(PrintableReport):
@@ -74,12 +76,12 @@ class ProfilerStats(PrintableReport):
 
     def print_report(self):
         COLSIZE = 14
-        print()
-        print("=" * 40)
-        print(f"{'module:':<{COLSIZE}}{self.module_name}")
-        print(f"{'suite:':<{COLSIZE}}{self.suite_name}")
-        print(f"{'average time:':<{COLSIZE}}{1000 * self.average_time()} ms")
-        print(f"{'total time:':<{COLSIZE}}{1000 * self.total_time()} ms\n")
+        out_report = []
+        out_report.append(f"{'module:':<{COLSIZE}}{self.module_name}")
+        out_report.append(f"{'suite:':<{COLSIZE}}{self.suite_name}")
+        out_report.append(f"{'average time:':<{COLSIZE}}{1000 * self.average_time()} ms")
+        out_report.append(f"{'total time:':<{COLSIZE}}{1000 * self.total_time()} ms\n")
+        super().print_report(out_report)
 
 
 class TesterBase:
