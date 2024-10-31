@@ -1,11 +1,54 @@
 import textwrap
-from argparse import ArgumentParser, RawTextHelpFormatter
+from argparse import (
+    ArgumentParser,
+    Namespace,
+    RawTextHelpFormatter,
+    Action as ArgAction,
+)
+from typing import Any, Sequence
 
 
 # https://stackoverflow.com/a/29485128
 class BlankLinesHelpFormatter(RawTextHelpFormatter):
     def _split_lines(self, text, width):
         return super()._split_lines(text, width) + [""]
+
+
+class ArgumentPairsAction(ArgAction):
+    def __call__(
+        self,
+        parser: ArgumentParser,
+        namespace: Namespace,
+        values: str | Sequence[Any] | None,
+        option_string: str | None = None,
+    ) -> None:
+        if len(values) % 3 != 0:
+            parser.error("Program arguments must come in name-type-value triples.")
+        # a makeshift reducer to avoid importing reduce
+        key = None
+        vtype = None
+
+        type_list = {
+            "bool": bool,
+            "int": int,
+            "float": float,
+            "str": str,
+        }
+
+        out_map: dict[str] = dict()
+        for item in values:
+            if key is None:
+                if not str.isidentifier(item):
+                    parser.error(
+                        f"Invalid key '{item}': arg names must be valid Python identifiers."
+                    )
+                key = item
+            elif vtype is None:
+                vtype = type_list[item.lower()]
+            else:
+                out_map[key] = vtype(item)
+                key = ModuleNotFoundError
+        setattr(namespace, self.dest, out_map)
 
 
 class TestingOptions:
@@ -44,6 +87,7 @@ class ArgsWrapper:
         self.__test_type = args.test_type
         self.__project = args.project
         self.__section = args.section
+        self.__arguments = args.args
         self.__unit = args.unit
         self.__verbose = args.verbose
 
@@ -60,7 +104,11 @@ class ArgsWrapper:
         return self.__verbose
 
     @property
-    def filters(self) -> dict[str, dict]:
+    def arguments(self) -> str | None:
+        return self.__arguments
+
+    @property
+    def filters(self) -> dict[str, set[str]]:
         return {"section_filter": self.__section, "unit_filter": self.__unit}
 
 
@@ -99,6 +147,20 @@ def getArguments(*args: str) -> ArgsWrapper:
         action="store_true",
         help="If present testing mode will show the passed cases too.",
     )
+    arg_parser.add_argument(
+        "--args",
+        nargs="+",
+        action=ArgumentPairsAction,
+        help=textwrap.dedent(
+            """\
+            Pass extra arguments to your interpreter function. They must come in triples in
+            the format name-type-value triples such as:
+                --args <name1> <type1> <value1> [<name2> <type2> <value2> ...]
+            Names must be valid Python identifiers, types can only be int,
+            float, str, or bool, and values must parse correctly to their respective type.
+            """
+        ),
+    )
 
     filter_group = arg_parser.add_mutually_exclusive_group()
     filter_group.add_argument(
@@ -115,6 +177,7 @@ def getArguments(*args: str) -> ArgsWrapper:
 
     p_args.test_type = TestingOptions(p_args.test_type[0])
     p_args.project = p_args.project[0] if p_args.project else p_args.project
+    p_args.args = p_args.args if p_args.args else dict()
     p_args.section = set(p_args.section) if p_args.section else set()
     p_args.unit = set(p_args.unit) if p_args.unit else set()
 
