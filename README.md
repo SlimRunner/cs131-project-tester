@@ -75,12 +75,12 @@ python ./main.py -v
 ```
 
 ### Parameter Pass-Thru
-The `--args` flag allows passing parameters to the tester callback. In the case of this project that is `interpreter.run`. Since the call back does not allow to give parameters other than the program code, then this option allows to pass other such as the ones inherited from `InterpreterBase` or custom of your own.
+The `--args` flag allows passing parameters to the tester callback. In the case of this project that is `interpreter.run`. Since the callback does not allow to provide parameters other than the program code, then this option allows to pass other such as the ones inherited from `InterpreterBase` or custom of your own.
 
-The parameters must be passed in sets of triples that contain (1) name of parameter, (2) type of parameter, and (3) value of parameter.
+The parameters must be passed in sets of triples that contain (1) name of parameter, (2) type of parameter, and (3) value of parameter. If your option causes the program to print extra debugging info, I recommend to use it in combination with `-t timeit` so that you can inspect the program output more easily.
 
 #### Example
-The following command runs the interpreter with the custom argument `trace_output`:
+The following command runs the interpreter with the custom argument named `trace_output` set to `True`:
 ```sh
 python ./main.py --args trace_output bool True
 ```
