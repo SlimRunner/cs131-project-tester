@@ -40,6 +40,14 @@
 		],
 		"description": "Adds the boiler-plate to add a unit test"
 	},
+	"Syntax Error": {
+		"scope": "markdown",
+		"prefix": "syntaxerror",
+		"body": [
+			"Syntax error",
+		],
+		"description": "Adds the Syntax error name"
+	},
 	"Name Error": {
 		"scope": "markdown",
 		"prefix": "namerror",
@@ -55,6 +63,14 @@
 			"ErrorType.TYPE_ERROR",
 		],
 		"description": "Adds the TYPE_ERROR name"
+	},
+	"Fault Error": {
+		"scope": "markdown",
+		"prefix": "faulterror",
+		"body": [
+			"ErrorType.FAULT_ERROR",
+		],
+		"description": "Adds the FAULT_ERROR name"
 	},
 	"main Function": {
 		"scope": "markdown,go",
