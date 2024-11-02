@@ -120,9 +120,6 @@ class TesterBase:
         else:
             return self.__callback(prog_arg)
 
-    def blank_section(self):
-        return {"code": [], "stdin": [], "stdout": [], "error": []}
-
     def validate_uniqueness(self, item: dict, key: str):
         if key in item:
             nice_path = os.path.relpath(self.__test_path)
@@ -253,7 +250,6 @@ class TesterBase:
                 raise SyntaxError(
                     f"Fatal error at:" + f"`{line}'.\nInvalid state transition."
                 )
-                # self.run_section()
 
         return state
 
