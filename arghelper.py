@@ -27,9 +27,12 @@ class ArgumentPairsAction(ArgAction):
         # a makeshift reducer to avoid importing reduce
         key = None
         vtype = None
+        vtype_key = None
+
+        Bool = lambda x: {"True": True, "False": False}[x]
 
         type_list = {
-            "bool": bool,
+            "bool": Bool,
             "int": int,
             "float": float,
             "str": str,
@@ -44,9 +47,16 @@ class ArgumentPairsAction(ArgAction):
                     )
                 key = item
             elif vtype is None:
-                vtype = type_list[item.lower()]
+                try:
+                    vtype_key = item.lower()
+                    vtype = type_list[vtype_key]
+                except Exception as err:
+                    parser.error(str(err) + "\nNot a valid type.")
             else:
-                out_map[key] = vtype(item)
+                try:
+                    out_map[key] = vtype(item)
+                except Exception as err:
+                    parser.error(str(err) + f"\nNot a valid `{vtype_key}' value.")
                 key = ModuleNotFoundError
         setattr(namespace, self.dest, out_map)
 
