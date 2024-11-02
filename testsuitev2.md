@@ -58,6 +58,51 @@ user input
 ```
 ```
 
+### Input Return Type
+
+*code*
+```go
+func main() {
+  var a;
+  a = inputs();
+  print("string MatcH" == a);
+  print("string Match" == a);
+  print("string MatcH" != a);
+  print("string Match" != a);
+  var b;
+  b = "-" + inputs() + "123";
+  print(b);
+  b = inputs();
+  print(a == b);
+  print(a != b);
+  print(a != b + "asd");
+}
+```
+
+*stdin*
+```
+string MatcH
+456
+string MatcH
+42
+```
+
+*sdtout*
+```
+true
+false
+false
+true
+-456123
+true
+false
+true
+```
+
+*stderr*
+```
+```
+
 ## Variables
 
 ### Declaration and Assignment
