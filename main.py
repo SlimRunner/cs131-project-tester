@@ -8,13 +8,13 @@ def main(Interpreter: type, proj_path: str, test_path: str, args: ArgsWrapper):
 
     match args.test_type:
         case TestingOptions.UNIT_TEST:
-            tester = Tester(proj_path, test_path, interpreter.run, **args.arguments)
+            tester = Tester(proj_path, test_path, interpreter.run, args.arguments)
         case TestingOptions.RUN_TEST:
-            tester = BatchRun(proj_path, test_path, interpreter.run, **args.arguments)
+            tester = BatchRun(proj_path, test_path, interpreter.run, args.arguments)
         case _:
             raise SystemExit(f"Unexpected test type: {args.test_type}")
 
-    tester.run_tests(**args.filters, verbose=args.verbose)
+    tester.run_tests(**args.filters, verbose=args.verbose, raise_errors=args.raise_errors)
     tester.result.print_report()
 
 

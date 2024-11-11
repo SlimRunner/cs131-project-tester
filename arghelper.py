@@ -100,6 +100,7 @@ class ArgsWrapper:
         self.__arguments = args.args
         self.__unit = args.unit
         self.__verbose = args.verbose
+        self.__raise_errors = args.raise_errors
 
     @property
     def test_type(self) -> TestingOptions:
@@ -112,6 +113,10 @@ class ArgsWrapper:
     @property
     def verbose(self) -> str | None:
         return self.__verbose
+
+    @property
+    def raise_errors(self) -> str | None:
+        return self.__raise_errors
 
     @property
     def arguments(self) -> str | None:
@@ -156,6 +161,12 @@ def getArguments(*args: str) -> ArgsWrapper:
         "--verbose",
         action="store_true",
         help="If present testing mode will show the passed cases too.",
+    )
+    arg_parser.add_argument(
+        "-E",
+        "--raise-errors",
+        action="store_true",
+        help="Do not waive exeptions, crash instead.",
     )
     arg_parser.add_argument(
         "--args",

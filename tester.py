@@ -91,9 +91,9 @@ class TesterBase:
     ERROR_OUTPUT = "error"
     TAB = "  "
 
-    def __init__(self, test_path: str, callback, **kwargs):
+    def __init__(self, test_path: str, callback, cb_kwargs: dict[str]):
         self.__callback = callback
-        self.__kwargs = kwargs
+        self.__kwargs = cb_kwargs
         self.__ttree: dict[str, dict[str, dict[str, dict[str, list[str]]]]] = dict()
         self.__test_path = test_path
         self.__key_map = []
@@ -144,7 +144,7 @@ class TesterBase:
         key = remove_hash.sub("", key).lower()
         return key not in filter
 
-    def run_tests(self, section_filter: set[str], unit_filter: set[str], verbose: bool):
+    def run_tests(self, section_filter: set[str], unit_filter: set[str], verbose: bool, raise_errors: bool):
         print_buffer: list[str] = []
         section_filter = {i.lower() for i in section_filter}
         unit_filter = {i.lower() for i in unit_filter}
@@ -163,7 +163,7 @@ class TesterBase:
                     if self.is_filtered(name, unit_filter):
                         continue
 
-                    passed, msg = self.run_section(unit)
+                    passed, msg = self.run_section(unit, raise_errors)
 
                     if passed and not verbose:
                         continue
@@ -255,11 +255,11 @@ class TesterBase:
 
 
 class Tester(TesterBase):
-    def __init__(self, proj_path, test_path: str, callback, **kwargs):
-        super().__init__(test_path, callback, **kwargs)
+    def __init__(self, proj_path, test_path: str, callback, cb_kwargs: dict[str]):
+        super().__init__(test_path, callback, cb_kwargs)
         self.result = TestResults(proj_path, test_path)
 
-    def run_section(self, unit: dict[str, list[str]]):
+    def run_section(self, unit: dict[str, list[str]], raise_errors: bool):
         program_source = "\n".join(unit[TesterBase.CODE])
         user_input = unit[TesterBase.USER_INPUT]
         error_definition = None
@@ -280,8 +280,11 @@ class Tester(TesterBase):
                 else:
                     error_name, error_definition = (e.args[0], "")
                 print(error_name, file=sys.stderr)
-            sys.stdout = sys.__stdout__
-            sys.stderr = sys.__stderr__
+                if raise_errors:
+                    raise e
+            finally:
+                sys.stdout = sys.__stdout__
+                sys.stderr = sys.__stderr__
 
         prog_out = [""]
         out_passed, out_msg = self.match_buffer(
@@ -368,7 +371,7 @@ class Tester(TesterBase):
 
         expected = "\n".join(unit_block)
         if received == expected:
-            return (True, [f"- {msg}: pass ✔"])
+            return (True, [f"- {msg}: pass ✔️"])
         else:
             out_msg = [f"- {msg}: FAIL ❌"]
             received = [f"`{l}`" for l in received.splitlines()]
@@ -378,8 +381,8 @@ class Tester(TesterBase):
 
 
 class BatchRun(TesterBase):
-    def __init__(self, proj_path, test_path: str, callback, **kwargs):
-        super().__init__(test_path, callback, **kwargs)
+    def __init__(self, proj_path, test_path: str, callback, cb_kwargs: dict[str]):
+        super().__init__(test_path, callback, cb_kwargs)
         self.result = ProfilerStats(proj_path, test_path)
 
     def trim_output(self, received: str):
@@ -387,7 +390,7 @@ class BatchRun(TesterBase):
             received = received[:-1]
         return received
 
-    def run_section(self, unit: dict[str, list[str]]):
+    def run_section(self, unit: dict[str, list[str]], raise_errors: bool):
         program_source = "\n".join(unit[TesterBase.CODE])
         user_input = unit[TesterBase.USER_INPUT]
         prog_out: list[str] = []
@@ -404,6 +407,8 @@ class BatchRun(TesterBase):
             except Exception as e:
                 error_message = e.args[0]
                 print(error_message)
+                if raise_errors:
+                    raise e
             finally:
                 self.result.record()
             print("```")
