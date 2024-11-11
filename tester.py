@@ -79,7 +79,9 @@ class ProfilerStats(PrintableReport):
         out_report = []
         out_report.append(f"{'module:':<{COLSIZE}}{self.module_name}")
         out_report.append(f"{'suite:':<{COLSIZE}}{self.suite_name}")
-        out_report.append(f"{'average time:':<{COLSIZE}}{1000 * self.average_time()} ms")
+        out_report.append(
+            f"{'average time:':<{COLSIZE}}{1000 * self.average_time()} ms"
+        )
         out_report.append(f"{'total time:':<{COLSIZE}}{1000 * self.total_time()} ms\n")
         super().print_report(out_report)
 
@@ -144,7 +146,13 @@ class TesterBase:
         key = remove_hash.sub("", key).lower()
         return key not in filter
 
-    def run_tests(self, section_filter: set[str], unit_filter: set[str], verbose: bool, raise_errors: bool):
+    def run_tests(
+        self,
+        section_filter: set[str],
+        unit_filter: set[str],
+        verbose: bool,
+        raise_errors: bool,
+    ):
         print_buffer: list[str] = []
         section_filter = {i.lower() for i in section_filter}
         unit_filter = {i.lower() for i in unit_filter}
