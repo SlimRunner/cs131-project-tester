@@ -55,7 +55,10 @@ ErrorType.TYPE_ERROR
 *code*
 ```go
 func main() : int {
-  return;
+  print("barista says this is valid?");
+  print("may be undefined behavior");
+  print("I am not sure");
+  return 6;
 }
 ```
 
@@ -65,11 +68,13 @@ func main() : int {
 
 *stdout*
 ```
+barista says this is valid?
+may be undefined behavior
+I am not sure
 ```
 
 *stderr*
 ```
-ErrorType.TYPE_ERROR
 ```
 
 ## Structs
@@ -82,9 +87,11 @@ struct foo {
   a: int;
 }
 
-func main() {
+func main() : void {
   var bar: foo;
-  bar.a = 5;
+  bar = new foo;
+  print(bar == nil);
+  bar.a = 5
   print(bar.a);
   print("all good!");
   return;
@@ -97,34 +104,36 @@ func main() {
 
 *stdout*
 ```
+true
 5
 all good!
 ```
 
 *stderr*
 ```
-Syntax error
 ```
 
 ### Composition of Structs
 
 *code*
 ```go
-struct foo {
-  bar: woo;
-}
-
 struct woo {
   main: int;
 }
 
+struct foo {
+  bar: woo;
+}
+
 func main() : void {
   var foo: woo;
+  print(foo != nil);
   foo = new woo;
   var bar: foo;
   bar = new foo;
   print(bar.bar == nil);
   bar.bar = foo;
+  bar.bar.main = 13
   print(bar.bar.main);
   print("all good!");
   return;
@@ -137,7 +146,9 @@ func main() : void {
 
 *stdout*
 ```
-5
+false
+true
+13
 all good!
 ```
 
@@ -147,9 +158,10 @@ all good!
 
 ### Struct Definition Must Come First
 
+> this error is handled by the parser
+
 *code*
 ```go
-
 func main() {
   print("all good!");
   return;
