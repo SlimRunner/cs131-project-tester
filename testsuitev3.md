@@ -24,6 +24,54 @@ func main() {
 ErrorType.TYPE_ERROR
 ```
 
+### Function Type Not Defined
+
+*code*
+```go
+func main() : void {
+  return;
+}
+
+func invalid_type() : GLaDOS {
+  return;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Main Must be Void
+
+*code*
+```go
+func main() : int {
+  return;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
 ## Structs
 
 ### Simple Struct Definition
