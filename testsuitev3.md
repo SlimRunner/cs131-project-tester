@@ -2,7 +2,7 @@
 
 ## Type Annotations
 
-### Function Type in Main
+### Missing Return Type in main
 
 *code*
 ```go
@@ -24,7 +24,59 @@ func main() {
 ErrorType.TYPE_ERROR
 ```
 
-### Function Type Not Defined
+### Missing Return Type in foo
+
+*code*
+```go
+func main() : void {
+  return;
+}
+
+func bar() : int {
+  return 5;
+}
+
+func foo() {
+  return;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Return Type Does Not Match Value
+
+*code*
+```go
+func main() : void {
+  return 5;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Labeled Function Return with Undefined Type
 
 *code*
 ```go
@@ -75,6 +127,89 @@ I am not sure
 
 *stderr*
 ```
+```
+
+### Simple Parameter Passing
+
+*code*
+```go
+func main() : void {
+  var a: int;
+  a = 0;
+  print(a);
+  foo(a);
+  print("remove a = 0 later when default value is set");
+}
+
+func foo(a: int) : void {
+  print(a);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+0
+0
+```
+
+*stderr*
+```
+```
+
+### Parameter Type Mismatch Int -> Str
+
+*code*
+```go
+func main() : void {
+  var a: int;
+  foo(a);
+  print("not fine");
+}
+
+func foo(a: str) : void {
+  print(a);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Labeled Parameter with Undefined Type
+
+*code*
+```go
+func main() : void {
+  return;
+}
+
+func foo(a: Glados) {return nil;}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
 ```
 
 ## Structs
@@ -178,10 +313,45 @@ struct foo {
 
 *stdout*
 ```
-Syntax error at 'struct' on line 7
+Syntax error at 'struct' on line 6
 ```
 
 *stderr*
 ```
 Syntax error
+```
+
+### Struct matches nil but not void
+
+*code*
+```go
+struct bar {
+  a: int;
+}
+
+func main(): void {
+  var a: int;
+  var b: bar;
+  b = nil;
+  print("fine so far");
+  b = foo();
+  print("not fine");
+  print(b);
+}
+
+func foo() : void {return;}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+fine so far
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
 ```
