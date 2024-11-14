@@ -1,33 +1,5 @@
 # Unit Tests V3
 
-## Test Section
-
-### Ad-Hoc Tests
-
-*code*
-```go
-struct Msg {
-  a: string;
-}
-
-func main(): void {
-
-}
-```
-
-*stdin*
-```
--5000
-```
-
-*stdout*
-```
-```
-
-*stderr*
-```
-```
-
 ## Type Validity
 
 ### Valid Print
