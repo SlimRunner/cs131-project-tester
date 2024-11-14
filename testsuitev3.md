@@ -1,6 +1,6 @@
 # Unit Tests V3
 
-## Type Annotations
+## Type Validity
 
 ### Missing Return Type in main
 
@@ -138,7 +138,6 @@ func main() : void {
   a = 0;
   print(a);
   foo(a);
-  print("remove a = 0 later when default value is set");
 }
 
 func foo(a: int) : void {
@@ -205,6 +204,164 @@ func foo(a: Glados) {return nil;}
 
 *stdout*
 ```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Matched Return Type
+
+*code*
+```go
+func main() : void {
+  var a: int;
+  var b: bool;
+  a = five();
+  print(a);
+  b = frive();
+  print(b);
+  b = five();
+  print(b);
+  b = zero();
+  print(b);
+}
+
+func five(): int {
+  return 5;
+}
+
+func zero(): int {
+  return 0;
+}
+
+func frive(): bool {
+  return 5;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+5
+true
+true
+false
+```
+
+*stderr*
+```
+```
+
+### Mismatched Return Assignment
+
+*code*
+```go
+func main() : void {
+  var a: int;
+  a = five();
+  print("should not print");
+}
+
+func five(): str {
+  return "five";
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Mismatched Return Value
+
+*code*
+```go
+func main() : void {
+  var a: str;
+  a = five();
+  print("should not print");
+}
+
+func five(): str {
+  return 5;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Type Coercion, input, shadowing, and void call
+
+*code*
+```go
+func main(): void {
+  var a: bool;
+  a = 10;
+  print(a);
+  if (a) {
+    var a:str;
+    a = "shadowed";
+    print(a);
+  }
+  print(a);
+  var b: int;
+  b = inputi("input prompt");
+  print(b);
+  foo(5);
+  foo(0);
+  foo(b);
+  print(bar());
+  print("should not print");
+}
+
+func foo(a: bool) : void {
+  print(a);
+  return;
+}
+
+func bar() : void {
+  return;
+}
+```
+
+*stdin*
+```
+-5432
+```
+
+*stdout*
+```
+true
+shadowed
+true
+input prompt
+-5432
+true
+false
+true
 ```
 
 *stderr*
