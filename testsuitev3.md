@@ -1,6 +1,60 @@
 # Unit Tests V3
 
+## Test Section
+
+### Ad-Hoc Tests
+
+*code*
+```go
+struct Msg {
+  a: string;
+}
+
+func main(): void {
+
+}
+```
+
+*stdin*
+```
+-5000
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+```
+
 ## Type Validity
+
+### Valid Print
+
+*code*
+```go
+func main() : void {
+  var a: string;
+  print(a);
+  a = "it wasn't str arghhhh.";
+  print(a);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+
+it wasn't str arghhhh.
+```
+
+*stderr*
+```
+```
 
 ### Missing Return Type in main
 
@@ -159,7 +213,7 @@ func foo(a: int) : void {
 ```
 ```
 
-### Parameter Type Mismatch Int -> Str
+### Parameter Type Mismatch Int -> String
 
 *code*
 ```go
@@ -169,7 +223,7 @@ func main() : void {
   print("not fine");
 }
 
-func foo(a: str) : void {
+func foo(a: string) : void {
   print(a);
 }
 ```
@@ -267,7 +321,7 @@ func main() : void {
   print("should not print");
 }
 
-func five(): str {
+func five(): string {
   return "five";
 }
 ```
@@ -290,12 +344,12 @@ ErrorType.TYPE_ERROR
 *code*
 ```go
 func main() : void {
-  var a: str;
+  var a: string;
   a = five();
   print("should not print");
 }
 
-func five(): str {
+func five(): string {
   return 5;
 }
 ```
@@ -322,7 +376,7 @@ func main(): void {
   a = 10;
   print(a);
   if (a) {
-    var a:str;
+    var a:string;
     a = "shadowed";
     print(a);
   }
