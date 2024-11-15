@@ -339,6 +339,226 @@ func five(): string {
 ErrorType.TYPE_ERROR
 ```
 
+### Nil Return Attempt on Primitive
+
+*code*
+```go
+func main() : void {
+  var a: string;
+  a = five();
+  print("should not print");
+}
+
+func five(): string {
+  return nil;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Type Coercion With Operators
+
+*code*
+```go
+func main(): void {
+  direct_print();
+  assign_var();
+  print_rets();
+  return;
+}
+
+func direct_print(): void {
+  print(-0);
+  print(-1);
+  print(!1);
+  print(!0);
+  print(!!-1);
+  print(!!false);
+  print(!false);
+  print(!!true);
+  print(!true);
+}
+
+func assign_var() : void {
+  var i: int;
+  i = 6;
+  var b: bool;
+  b = i;
+  i = 0;
+  print(b);
+  b = -2;
+  print(b);
+  b = 1 / 2;
+  print(b);
+}
+
+func print_rets() : void {
+  print(ret_bool(4));
+  print(ret_bool(0));
+  print(ret_bool(-20));
+  print(impl_ret());
+  print(!impl_ret());
+}
+
+func ret_bool(a: int) : bool {
+  return a;
+}
+
+func impl_ret() : bool {
+  var a: int;
+}
+
+func bool_expr() : bool {
+  var a: int;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+0
+-1
+false
+true
+true
+false
+true
+true
+false
+true
+true
+false
+true
+false
+true
+false
+true
+```
+
+*stderr*
+```
+```
+
+### Int-Boolean If-For Condition
+
+*code*
+```go
+func main() : void {
+  var vd: bool;
+  vd = false;
+  if (inputs() == "I'm in") {
+    var i: int;
+    for (i = 0; i - 10; i = i + 1) {
+      var x: int;
+      x = i * i - 7 * i + 10;
+      if (!x) {
+        vd = x;
+        print("is zero:    ", i, " -> ", x);
+      } else {
+        if (x < 0) {
+          print("below zero: ", i, " -> ", x);
+        } else {
+          print("above zero: ", i, " -> ", x);
+        }
+      }
+    }
+  }
+}
+```
+
+*stdin*
+```
+I'm in
+```
+
+*stdout*
+```
+above zero: 0 -> 10
+above zero: 1 -> 4
+is zero:    2 -> 0
+below zero: 3 -> -2
+below zero: 4 -> -2
+is zero:    5 -> 0
+above zero: 6 -> 4
+above zero: 7 -> 10
+above zero: 8 -> 18
+above zero: 9 -> 28
+```
+
+*stderr*
+```
+```
+
+### Tagged nil Validity
+
+*code*
+```go
+struct A {x: int;}
+struct B {x: int;}
+
+func main(): void {
+  var a: A;
+  var b: B;
+  a = getAnil();
+  b = getBnil();
+  print(a);
+  print(b);
+  print("fine so far");
+  getB();
+  return;
+}
+
+func getA() : A {
+  var b: B;
+  b = nil;
+  return b;
+}
+
+func getB() : B {
+  var a: A;
+  a = nil;
+  return a;
+}
+
+func getAnil() : A {
+  return nil;
+}
+
+func getBnil() : B {
+  return nil;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+nil
+nil
+fine so far
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
 ### Type Coercion, input, shadowing, and void call
 
 *code*
@@ -446,6 +666,36 @@ ErrorType.NAME_ERROR
 ```
 
 ## Structs
+
+### Attempt to Print Struct
+
+*code*
+```go
+struct A {x: bool;}
+
+func main() : void {
+  var a: A;
+  print(a);
+  /*
+  this is undefined behavior
+  a = new A;
+  print(a);
+  */
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+nil
+```
+
+*stderr*
+```
+```
 
 ### Simple Struct Definition
 
