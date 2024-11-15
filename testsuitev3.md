@@ -665,6 +665,36 @@ func main() : void {
 ErrorType.NAME_ERROR
 ```
 
+### Nil Validity with Primitives
+
+*code*
+```go
+func incorrect() : int{
+  var x : int;
+}
+func main() : void{
+  print("hi");
+  incorrect();
+  var x : int;
+  x = nil;
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+hi
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
 ## Structs
 
 ### Attempt to Print Struct
@@ -999,6 +1029,144 @@ new obj
 
 *stderr*
 ```
+```
+
+### Invalid New Type
+
+*code*
+```go
+func main(): void {
+  var foo: int;
+  foo = new A;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### test nil to struct func
+
+*code*
+```go
+struct p {
+  x:int;
+}
+
+func foop(s: p): void {
+  print(s == nil);
+}
+
+func main(): void {
+  var x: p;
+  foop(x);
+  foop(nil);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+true
+true
+```
+
+*stderr*
+```
+```
+
+### Nil Validity in Struct
+
+*code*
+```go
+struct circle {
+  r: int;
+}
+
+struct square {
+  s: int;
+}
+
+
+func main(): void {
+  var c: circle;
+  var s: square;
+
+  print(c == s);
+
+  s = new square;
+  print(c == s);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Invalid Paramter with Structs
+
+*code*
+```go
+struct animal {
+    name : string;
+    noise : string;
+    color : string;
+    extinct : bool;
+    ears: int;
+}
+struct person {
+  name: string;
+  height: int;
+}
+func main() : void {
+   var pig : animal;
+   var p : person;
+   var noise : string;
+   noise = make_pig(p, "oink");
+   print(noise);
+}
+func make_pig(a : animal, noise : string) : string{
+  if (a == nil){
+    print("making a pig");
+    a = new animal;
+  }
+  a.noise = noise;
+  return a.noise;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
 ```
 
 ## Spec Tests
