@@ -96,12 +96,20 @@ The following command runs the interpreter with the custom argument named `trace
 python ./main.py --args trace_output bool True
 ```
 
+### Crash On Error
+The flag `-E` allows you to waive the error handling; thus, when the tester encounters an error it will crash and you can see Python extended error message. The recommended use of this flag is in combination with `-u` to choose only the test case you want to test because incorrectness passing tests will crash as well.
+
+#### Example
+```sh
+python ./main.py -u 'simple loop' -E
+```
+
 ### Help
 The `-h` flag shows extended information about each flag.
 ```
 python ./main.py -h
 ```
-It has information about some flags not mentioned here such as `--args`.
+It always has the up-to-date information about all flags. You can also feed its output to ChatGPT so that it knows how to generate a command for you.
 
 ## Test Case Formatting
 The tester lets you write your Brewin code in a markdown file (i.e. [testsuitev2.md](./testsuitev2.md)). Its benefits are that since Brewin is pretty similar to Go, you get syntax highlighting for free in code blocks.
