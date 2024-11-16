@@ -695,6 +695,50 @@ hi
 ErrorType.TYPE_ERROR
 ```
 
+### Coercion Correctness
+
+*code*
+```go
+func main(): void {
+  print(true && 5+6+4-2 || false && 5);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+true
+```
+
+*stderr*
+```
+```
+
+### Coercion Incorrectess
+
+*code*
+```go
+func main(): void {
+  print(true && 5+6+(4-2 || false) && 5);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
 ## Structs
 
 ### Attempt to Print Struct
@@ -806,36 +850,6 @@ all good!
 
 *stderr*
 ```
-```
-
-### Struct Definition Must Come First
-
-> this error is handled by the parser
-
-*code*
-```go
-func main() {
-  print("all good!");
-  return;
-}
-
-struct foo {
-  a: int;
-}
-```
-
-*stdin*
-```
-```
-
-*stdout*
-```
-Syntax error at 'struct' on line 6
-```
-
-*stderr*
-```
-Syntax error
 ```
 
 ### Linked List
@@ -1167,6 +1181,148 @@ func make_pig(a : animal, noise : string) : string{
 *stderr*
 ```
 ErrorType.TYPE_ERROR
+```
+
+### Linked List Complex
+
+> this is a very good thing to test `new_node.next = nil;`
+> courtesy of classmate in campuswire @632
+
+*code*
+```go
+struct node {
+  value: int;
+  next: node;
+}
+
+struct list {
+  head: node;
+}
+
+func create_list(): list {
+  var l: list;
+  l = new list;
+  l.head = nil;
+  return l;
+}
+
+func append(l: list, val: int): void {
+  var new_node: node;
+  new_node = new node;
+  new_node.value = val;
+  new_node.next = nil;
+
+  if (l.head == nil) {
+    l.head = new_node;
+  } else {
+    var current: node;
+    for (current = l.head; current.next != nil; current = current.next) {
+      /* It doesn't work in Barista if it's empty, so this is just a useless line */
+      print("placeholder");
+    }
+    current.next = new_node;
+  }
+  return;
+}
+
+func print_list(l: list): void {
+  var current: node;
+
+  if (l.head == nil) {
+    print("List is empty.");
+    return;
+  }
+
+  for (current = l.head; current != nil; current = current.next) {
+    print(current.value);
+  }
+  return;
+}
+
+func main(): void {
+  var l: list;
+  l = create_list();
+
+  append(l, 10);
+  append(l, 20);
+  append(l, 30);
+
+  print("Printing the list:");
+  print_list(l);
+
+  return;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+placeholder
+Printing the list:
+10
+20
+30
+```
+
+*stderr*
+```
+```
+
+### Reference Hell
+
+*code*
+```go
+struct X {i: int; b: bool; s:string;}
+struct Y {i: int; b: bool; s:string;}
+struct Z {x: X; y: Y; z: Z;}
+
+func main(): void {
+  var v: Z;
+  v = new Z;
+  setZ(v, 42, true, "marco");
+  v.z.z.z.z = nil;
+  print("v.x.i: ", v.x.i);
+  print("v.x.b: ", v.x.b);
+  print("v.x.s: ", v.x.s);
+  print("v.y.i: ", v.y.i);
+  print("v.y.b: ", v.y.b);
+  print("v.y.s: ", v.y.s);
+  print(v.z.z.z.z.y.b);
+}
+
+func setZ(v: Z, i: int, b: bool, s:string): void {
+  v.z = v;
+  v.x = new X;
+  v.y = new Y;
+  v.z.z.z.z.z.z.x.i = i;
+  v.x.b = b;
+  v.z.z.z.z.x.s = s;
+  v.z.z.z.z.z.z.y.i = 100 - i;
+  v.y.b = !b;
+  v.z.z.z.z.y.s = s + " polo";
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+v.x.i: 42
+v.x.b: true
+v.x.s: marco
+v.y.i: 58
+v.y.b: false
+v.y.s: marco polo
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
 ```
 
 ## Spec Tests
