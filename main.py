@@ -1,6 +1,13 @@
 from tester import Tester, BatchRun
 from arghelper import getArguments, TestingOptions, ArgsWrapper
-from testersetup import find_projects, choose_project, choose_latest_project
+from testexporter import TestCaseExporter
+from testersetup import (
+    find_projects,
+    choose_project,
+    choose_latest_project,
+    choose_suite,
+    choose_latest_suite,
+)
 
 
 def main(Interpreter: type, proj_path: str, test_path: str, args: ArgsWrapper):
@@ -20,21 +27,33 @@ def main(Interpreter: type, proj_path: str, test_path: str, args: ArgsWrapper):
     tester.result.print_report()
 
 
+def export(test_path: str, args: ArgsWrapper):
+    cases = TestCaseExporter(test_path)
+    cases.export_case_as_zip(args.export)
+
 if __name__ == "__main__":
     args = getArguments()
     projects = find_projects()
-    TARGET_MODULE = "Interpreter"
 
-    if args.project:
-        Interpreter, proj_path, test_path = choose_project(
-            args.project, projects, TARGET_MODULE
-        )
+    if args.export:
+        if args.project:
+            test_path = choose_suite(args.project, projects)
+        else:
+            test_path = choose_latest_suite(projects)
+        export(test_path, args)
     else:
-        Interpreter, proj_path, test_path = choose_latest_project(
-            projects, TARGET_MODULE
-        )
+        TARGET_MODULE = "Interpreter"
 
-    if Interpreter is None:
-        raise SystemExit("Unexpected exit: Interpreter is None.")
+        if args.project:
+            Interpreter, proj_path, test_path = choose_project(
+                args.project, projects, TARGET_MODULE
+            )
+        else:
+            Interpreter, proj_path, test_path = choose_latest_project(
+                projects, TARGET_MODULE
+            )
 
-    main(Interpreter, proj_path, test_path, args)
+        if Interpreter is None:
+            raise SystemExit("Unexpected exit: Interpreter is None.")
+
+        main(Interpreter, proj_path, test_path, args)

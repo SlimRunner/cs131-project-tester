@@ -63,6 +63,27 @@ def find_projects() -> dict[str, ProjectEntry]:
     return entries
 
 
+def choose_suite(proj_version: str, projects: dict[str, ProjectEntry]):
+    if proj_version not in projects or projects[proj_version].testsuite is None:
+        raise SystemExit(f"There is no suite version {proj_version}.")
+    test_path: str = projects[proj_version].testsuite_path
+    print("Exporting suite version", projects[proj_version].version, "\n")
+    return test_path
+
+
+def choose_latest_suite(projects: dict[str, ProjectEntry]):
+    sorted_projects = [entry for _, entry in sorted(projects.items(), reverse=True)]
+    valid_projects = [entry for entry in sorted_projects if entry.testsuite]
+    if not len(projects):
+        raise SystemExit("There are no projects available in the root directory.")
+    elif not len(valid_projects):
+        raise SystemExit("There are no testsuites in the root directory.")
+
+    test_path: str = valid_projects[0].testsuite_path
+    print("Exporting suite version", valid_projects[0].version, "\n")
+    return test_path
+
+
 def choose_project(
     proj_version: str, projects: dict[str, ProjectEntry], target_module: str
 ):

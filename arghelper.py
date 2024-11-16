@@ -1,9 +1,11 @@
+import os
 import textwrap
 from argparse import (
     ArgumentParser,
     Namespace,
     RawTextHelpFormatter,
     Action as ArgAction,
+    SUPPRESS,
 )
 from typing import Any, Sequence
 
@@ -96,6 +98,7 @@ def strVersion(val: str):
 
 class ArgsWrapper:
     def __init__(self, args) -> None:
+        self.__args = args.arg_parser
         self.__test_type = args.test_type
         self.__project = args.project
         self.__section = args.section
@@ -103,6 +106,11 @@ class ArgsWrapper:
         self.__unit = args.unit
         self.__verbose = args.verbose
         self.__raise_errors = args.raise_errors
+        self.__export = args.export
+
+    @property
+    def argparse(self) -> ArgumentParser:
+        return self.__args
 
     @property
     def test_type(self) -> TestingOptions:
@@ -119,6 +127,10 @@ class ArgsWrapper:
     @property
     def raise_errors(self) -> str | None:
         return self.__raise_errors
+
+    @property
+    def export(self) -> str | None:
+        return self.__export
 
     @property
     def arguments(self) -> str | None:
@@ -144,7 +156,8 @@ def getArguments(*args: str) -> ArgsWrapper:
         help=textwrap.dedent(
             f"""\
             Allows different modes of running your test programs. The options are:
-                - {TestingOptions.UNIT_TEST}: runs each program against the expected output and shows a diff.
+                - {TestingOptions.UNIT_TEST}: runs each program against the expected output
+                  and shows a diff.
                 - {TestingOptions.RUN_TEST}: runs each program as-is and shows the output.
             """
         ),
@@ -171,6 +184,19 @@ def getArguments(*args: str) -> ArgsWrapper:
         help="Do not waive exeptions, crash instead.",
     )
     arg_parser.add_argument(
+        "-X",
+        "--export",
+        nargs="?",
+        default=SUPPRESS,
+        metavar="PATH",
+        help=textwrap.dedent(
+            """\
+            Exports the selected unit tests in a zip file. You can select the cases you want
+            with `-p` flag. All other flags are ignored when you use the export flag.
+            """
+        ),
+    )
+    arg_parser.add_argument(
         "--args",
         nargs="+",
         action=ArgumentPairsAction,
@@ -179,8 +205,8 @@ def getArguments(*args: str) -> ArgsWrapper:
             Pass extra arguments to your interpreter function. They must come in triples in
             the format name-type-value triples such as:
                 --args <name1> <type1> <value1> [<name2> <type2> <value2> ...]
-            Names must be valid Python identifiers, types can only be int,
-            float, str, or bool, and values must parse correctly to their respective type.
+            Names must be valid Python identifiers, types can only be int, float, str, or
+            bool, and values must parse correctly to their respective type.
             """
         ),
     )
@@ -198,10 +224,17 @@ def getArguments(*args: str) -> ArgsWrapper:
     else:
         p_args = arg_parser.parse_args()
 
+    setattr(p_args, "arg_parser", arg_parser)
     p_args.test_type = TestingOptions(p_args.test_type[0])
     p_args.project = p_args.project[0] if p_args.project else p_args.project
     p_args.args = p_args.args if p_args.args else dict()
     p_args.section = set(p_args.section) if p_args.section else set()
     p_args.unit = set(p_args.unit) if p_args.unit else set()
+    if "export" not in p_args:
+        setattr(p_args, "export", None)
+    else:
+        p_args.export = os.path.abspath(p_args.export if p_args.export else "./")
+        if not os.path.isdir(p_args.export):
+            arg_parser.error(f"-X has an invalid path to a directory")
 
     return ArgsWrapper(p_args)
