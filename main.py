@@ -31,6 +31,7 @@ def export(test_path: str, args: ArgsWrapper):
     cases = TestCaseExporter(test_path)
     cases.export_case_as_zip(args.export)
 
+
 if __name__ == "__main__":
     args = getArguments()
     projects = find_projects()

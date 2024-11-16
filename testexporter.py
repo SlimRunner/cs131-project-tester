@@ -40,7 +40,7 @@ class TestCaseParser:
 
                 state = self.advance_fsm(state, lnw)
 
-    def get_cases_tree(self):        
+    def get_cases_tree(self):
         return self.__ttree.items()
 
     def validate_uniqueness(self, item: dict, key: str):
@@ -131,11 +131,10 @@ class TestCaseParser:
         return state
 
 
-
 class TestCaseExporter(TestCaseParser):
     def __init__(self, test_path: str):
         super().__init__(test_path)
-    
+
     def export_case_as_zip(self, path: str):
         title, cases = self.get_cases_as_files()
         zip_buffer = io.BytesIO()
@@ -153,16 +152,17 @@ class TestCaseExporter(TestCaseParser):
 
         out_path = os.path.join(path, title)
 
-        if os.path.exists(out_path) and not askUser(f"This action will override {title}\nProceed?"):
+        if os.path.exists(out_path) and not askUser(
+            f"This action will override {title}\nProceed?"
+        ):
             print("Operation was aborted")
             return False
 
         zip_buffer.seek(0)
         with open(out_path, "wb") as f:
             f.write(zip_buffer.read())
-        
-        return True
 
+        return True
 
     def get_cases_as_files(self):
         text_files: dict[str, tuple[str, str]] = dict()
@@ -194,6 +194,6 @@ class TestCaseExporter(TestCaseParser):
                     this_file.append("*OUT*")
                     this_file.append("*/")
                     text_files[f"{sname}-{uname}"] = (pdir, "\n".join(this_file))
-        
+
         zip_fname = zip_fname[2:].replace(" ", "_")
         return zip_fname, text_files
