@@ -56,6 +56,17 @@ The `-t` flag allows to select what mode to run the program on. There are two mo
 python ./main.py -t timeit
 ```
 
+### Exporting
+You do not vibe with my tester? No problem run the tester with the `-X` flag and it will generate a zip file with all the test cases converted to individual files you can drop in the [official tester](https://github.com/UCLA-CS-131/fall-24-autograder). You may only use this flag alone to export the most recent project or combine it with `-p` to choose a project manually. If you mix it with other flags this will supercede them all.
+
+It will ask you if you want to override an existing file.
+
+#### Example
+```sh
+# imports the default project tests cases one folder up
+python ./main.py -X ../
+```
+
 ### Filtering
 You may filter the test cases by their direct subtitle (`-u` or `--unit`) or by the subtitle one level up (`-s` or `--section`). These flags are mutually exlusive and expect one or more strings (remember to use quotes for multi word titles).
 
@@ -90,6 +101,7 @@ The `-h` flag shows extended information about each flag.
 ```
 python ./main.py -h
 ```
+It has information about some flags not mentioned here such as `--args`.
 
 ## Test Case Formatting
 The tester lets you write your Brewin code in a markdown file (i.e. [testsuitev2.md](./testsuitev2.md)). Its benefits are that since Brewin is pretty similar to Go, you get syntax highlighting for free in code blocks.
