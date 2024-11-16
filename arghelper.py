@@ -55,9 +55,11 @@ class ArgumentPairsAction(ArgAction):
             else:
                 try:
                     out_map[key] = vtype(item)
+                    key = None
+                    vtype = None
                 except Exception as err:
                     parser.error(str(err) + f"\nNot a valid `{vtype_key}' value.")
-                key = ModuleNotFoundError
+
         setattr(namespace, self.dest, out_map)
 
 
