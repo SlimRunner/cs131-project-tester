@@ -2,6 +2,56 @@
 
 ## Type Validity
 
+### nil in if-statement condition
+
+*code*
+```go
+func main(): void {
+  if (nil) { print("true"); }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### nil in for-statement condition
+
+*code*
+```go
+func main(): void {
+  var a: int;
+  a = 0;
+  print("a is not assignible to 0");
+  print("ignore this test until you fix that");
+  for (a = 0; nil; a = 0) { print("true"); }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+a is not assignible to 0
+ignore this test until you fix that
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
 ### Valid Print
 
 *code*
@@ -648,6 +698,7 @@ struct A {
 
 func main() : void {
   var a : A;
+  a = new A;
   print(a.b);
 }
 ```
@@ -1323,6 +1374,36 @@ v.y.s: marco polo
 *stderr*
 ```
 ErrorType.FAULT_ERROR
+```
+
+### Validate nil to primitive struct member
+
+*code*
+```go
+struct X {i: int; b: bool; s:string;}
+struct Z {x: X; y: Y; z: Z;}
+
+func main(): void {
+  var v: X;
+  var w: Z;
+  v = new X;
+  w = new Z;
+  w.x = v;
+  w.x.i = nil;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
 ```
 
 ## Spec Tests
