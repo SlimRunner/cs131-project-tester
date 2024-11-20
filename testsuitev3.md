@@ -790,6 +790,84 @@ func main(): void {
 ErrorType.TYPE_ERROR
 ```
 
+### Unary Negation on Bool
+
+*code*
+```go
+func main() : int {
+  var a: bool;
+  print(-a);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Strings have no order
+
+*code*
+```go
+func main(): void {
+  var a: bool;
+  a = "a" <= "b";
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Attempt to return bool to int
+
+*code*
+```go
+func main() : void {
+  var result: bool;
+  result = is_positive(10);
+  print(result);
+
+  result = is_positive(-5);
+  print(result);
+}
+
+func is_positive(n: int) : int {
+  return n > 0;
+}
+
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
 ## Structs
 
 ### Attempt to Print Struct
