@@ -91,6 +91,7 @@ class TesterBase:
     USER_INPUT = "stdin"
     PROG_OUTPUT = "stdout"
     ERROR_OUTPUT = "error"
+    LINE_NUMBER = "linenum"
     TAB = "  "
 
     def __init__(self, test_path: str, callback, cb_kwargs: dict[str]):
@@ -104,7 +105,7 @@ class TesterBase:
         whitelist = re.compile(r"^$|\*[\w ]+\*|^>")
 
         with open(test_path) as file:
-            for line in file:
+            for i, line in enumerate(file):
                 lnw = line.rstrip("\n")
                 lsp = line.rstrip()
 
@@ -114,7 +115,11 @@ class TesterBase:
                 if whitelist.match(lsp):
                     continue  # ignore line
 
-                state = self.advance_fsm(state, lnw)
+                state = self.advance_fsm(state, lnw, i + 1)
+
+    @property
+    def test_path(self):
+        return self.__test_path
 
     def callback(self, prog_arg: str):
         if len(self.__kwargs):
@@ -200,7 +205,7 @@ class TesterBase:
             case _:
                 return False
 
-    def advance_fsm(self, state, line):
+    def advance_fsm(self, state, line, lnum):
         FSM = {
             None: [(r"^# ", "title")],
             "title": [(r"^## ", "section")],
@@ -231,7 +236,7 @@ class TesterBase:
                 self.__ttree[line] = dict()
                 self.__key_map.append(self.__ttree[line])
 
-            case ("section", "title") | ("unit", "section"):
+            case ("section", "title"):
                 self.add_level(self.__key_map[-1], line, dict())
 
             case "section", "error-end":
@@ -239,9 +244,12 @@ class TesterBase:
                 self.__key_map.pop()
                 self.add_level(self.__key_map[-1], line, dict())
 
+            case ("unit", "section"):
+                self.add_level(self.__key_map[-1], line, dict({"linenum": lnum}))
+
             case "unit", "error-end":
                 self.__key_map.pop()
-                self.add_level(self.__key_map[-1], line, dict())
+                self.add_level(self.__key_map[-1], line, dict({"linenum": lnum}))
 
             case ("code", _) | ("stdin", _) | ("stdout", _) | ("error", _):
                 self.add_item(self.__key_map[-1], state, [])
@@ -270,6 +278,7 @@ class Tester(TesterBase):
     def run_section(self, unit: dict[str, list[str]], raise_errors: bool):
         program_source = "\n".join(unit[TesterBase.CODE])
         user_input = unit[TesterBase.USER_INPUT]
+        line_num = unit[TesterBase.LINE_NUMBER]
         error_definition = None
 
         with patch("builtins.input", side_effect=user_input):
@@ -294,7 +303,8 @@ class Tester(TesterBase):
                 sys.stdout = sys.__stdout__
                 sys.stderr = sys.__stderr__
 
-        prog_out = [""]
+        prog_out = [f"> ./{os.path.relpath(self.test_path)} line {line_num}"]
+        prog_out.append("")
         out_passed, out_msg = self.match_buffer(
             stdout_buff.getvalue(), unit[TesterBase.PROG_OUTPUT], "stdout"
         )
@@ -401,12 +411,14 @@ class BatchRun(TesterBase):
     def run_section(self, unit: dict[str, list[str]], raise_errors: bool):
         program_source = "\n".join(unit[TesterBase.CODE])
         user_input = unit[TesterBase.USER_INPUT]
+        line_num = unit[TesterBase.LINE_NUMBER]
         prog_out: list[str] = []
 
         with patch("builtins.input", side_effect=user_input):
             stdout_buff = io.StringIO()
             sys.stdout = stdout_buff
 
+            print(f"> ./{os.path.relpath(self.test_path)} line {line_num}")
             print("```")
             try:
                 self.result.start()
