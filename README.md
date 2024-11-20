@@ -165,13 +165,14 @@ The tags such as `*code*` are optional and can contain any text you want, so lon
 ## Scorer Output
 The output of the scorer may look like this:
 ```
-# Unit Tests V2
-## Error Format Test
+# Unit Tests V4
+## Meta Test
 ### Diff Test
+> ./testsuitev4.md line 5
 
 - stdout: FAIL ❌
 
-  |  # | received | expected | #  |
+  |  # | received | expected |  # |
   | -- | -------- | -------- | -- |
   | 01 | `asd`    | `qwe`    | 01 |
   | 02 | ``       | `l`      | 02 |
@@ -188,7 +189,7 @@ The output of the scorer may look like this:
 
   -  if-statement condition must evaluate to boolean
 ```
-It is formatted in such a way that it can look good in markdown if you wanted to redirect the output to a markdown file to inspect it more easily.
+It is formatted to look good in markdown and in plain text, so you can redirect the output to a markdown file to inspect it more easily. **It also includes the source with line number to allow VS Code link navigation**. [See more about that here](https://code.visualstudio.com/docs/terminal/basics#_links).
 
 You may notice some lines have back ticks. These help you differentiate if there was an empty line expected (\`\`). In general if there is a backticked message in both matching lines it means that received does not match expected. If either has a non-backticked message it means either recieved something extra or expected something that is not there. Also, if an error was emitted by the interpreter, the description will be put below. However, exact descriptions are _not_ matched. That is to keep the test easier to write.
 
