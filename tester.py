@@ -7,6 +7,14 @@ import difflib
 from unittest.mock import patch
 
 
+# I did not inherit from SyntaxError because for some reason
+# super().__init__() does not support end_lineno or end_offset. So
+# stupid that this is not mentioned in the documentation.
+def ParseError(msg, file, lnum, lerr, mark):
+    ms, ml = mark
+    return SyntaxError(msg, (file, lnum, ms, lerr, lnum, ms + ml))
+
+
 class PrintableReport:
     def __init__(self, proj_path: str, test_path: str) -> None:
         self.__test_path = test_path
@@ -100,12 +108,14 @@ class TesterBase:
         self.__ttree: dict[str, dict[str, dict[str, dict[str, list[str]]]]] = dict()
         self.__test_path = test_path
         self.__key_map = []
+        self.__curr_line = None
 
         state = None
         whitelist = re.compile(r"^$|\*[\w ]+\*|^>")
 
         with open(test_path) as file:
-            for i, line in enumerate(file):
+            for num, line in enumerate(file):
+                self.__curr_line = num
                 lnw = line.rstrip("\n")
                 lsp = line.rstrip()
 
@@ -115,7 +125,9 @@ class TesterBase:
                 if whitelist.match(lsp):
                     continue  # ignore line
 
-                state = self.advance_fsm(state, lnw, i + 1)
+                state = self.advance_fsm(state, lnw, num + 1)
+
+        self.__curr_line = None
 
     @property
     def test_path(self):
@@ -129,8 +141,11 @@ class TesterBase:
 
     def validate_uniqueness(self, item: dict, key: str):
         if key in item:
-            nice_path = os.path.relpath(self.__test_path)
-            raise SystemExit(f"`{key}' is a duplicate entry in {nice_path}")
+            lnum = self.__curr_line + 1
+            full_path = os.path.abspath(self.test_path)
+            raise ParseError(
+                "duplicate entry in test suite", full_path, lnum, key, (5, len(key))
+            )
 
     def add_level(self, active_item: dict, key: str, payload):
         self.validate_uniqueness(active_item, key)
@@ -227,9 +242,16 @@ class TesterBase:
                 state = next
 
         if entry_state == state:
-            raise SyntaxError(
-                f"Incorrectly formatted test cases. It failed at:" + f"`{line}'"
-            )
+            full_path = os.path.abspath(self.test_path)
+            msg = "stale state transition found"
+            if line and line.startswith("#"):
+                msg += ". Possibly incorrectly nested title"
+                marks = (1, line.count("#"))
+            else:
+                msg += ". This may be a typo"
+                marks = (1, len(line))
+
+            raise ParseError(msg, full_path, lnum, line, marks)
 
         match state, entry_state:
             case "title", None:
@@ -263,8 +285,13 @@ class TesterBase:
                 pass
 
             case _:
-                raise SyntaxError(
-                    f"Fatal error at:" + f"`{line}'.\nInvalid state transition."
+                full_path = os.path.abspath(self.test_path)
+                raise ParseError(
+                    "unexpected error due to invalid state transition",
+                    full_path,
+                    lnum,
+                    line,
+                    (0, 0),
                 )
 
         return state
