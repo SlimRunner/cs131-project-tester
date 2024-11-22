@@ -31,14 +31,14 @@ My tester was developed and tested on **Python v3.10.0**. Earlier version might 
 Also, it only depends on standard libraries and _your_ project files, so you do not need to install any dependencies.
 
 ## Usage
-Add a project to the root of this repo. The program automatically seeks all files named `interpreterv#.py` and `testsuitev#.md` where `#` can be any number (including zero padded numbers). If you pass no flags, the command will run the project with the highest version that has **both an interpreter and a testsuite** and it will run in testing mode. If you want to change the behavior of how it starts up, `main.py` was made as simple as possible to make editing it easy.
+Add a project to the root of this repo. The program automatically seeks all files named `interpreterv#.py` and `testsuitev#.md` where `#` can be any number (including zero padded numbers). If you pass no flags, the command will run the project with the highest version that has **both an interpreter and a testsuite** and it will run in testing mode. If you want to change the behavior of how it starts up, `brewtest.py` was made as simple as possible to make editing it easy.
 
 ### Default
 The highest (lexicographically sorted) version will be run, and the project will be run in test mode. Also, it will show only the test case that fail.
 
 #### Example
 ```sh
-python ./main.py
+python ./brewtest.py
 ```
 
 ### Run specifc version
@@ -46,14 +46,14 @@ The `-p` flag allows to select a specific version of the project. The input is a
 
 #### Example
 ```sh
-python ./main.py -p 2 # runs project v2
+python ./brewtest.py -p 2 # runs project v2
 ```
 
 ### Run mode
 The `-t` flag allows to select what mode to run the program on. There are two modes. The default is `testit` which tests and scores each program. The other mode is `timeit` which times how long each program takes to run and it prints their output.
 
 ```sh
-python ./main.py -t timeit
+python ./brewtest.py -t timeit
 ```
 
 ### Exporting
@@ -64,7 +64,7 @@ It will ask you if you want to override an existing file.
 #### Example
 ```sh
 # imports the default project tests cases one folder up
-python ./main.py -X ../
+python ./brewtest.py -X ../
 ```
 
 ### Filtering
@@ -73,8 +73,8 @@ You may filter the test cases by their direct subtitle (`-u` or `--unit`) or by 
 #### Example
 
 ```sh
-python ./main.py -s "variables" "functions"
-python ./main.py -u "simple loop" "call to print"
+python ./brewtest.py -s "variables" "functions"
+python ./brewtest.py -u "simple loop" "call to print"
 ```
 
 ### Verbose
@@ -82,7 +82,7 @@ The `-v` flag allows to print all the sections including the ones that passed. T
 #### Example
 
 ```sh
-python ./main.py -v
+python ./brewtest.py -v
 ```
 
 ### Parameter Pass-Thru
@@ -93,7 +93,7 @@ The parameters must be passed in sets of triples that contain (1) name of parame
 #### Example
 The following command runs the interpreter with the custom argument named `trace_output` set to `True`:
 ```sh
-python ./main.py --args trace_output bool True
+python ./brewtest.py --args trace_output bool True
 ```
 
 ### Crash On Error
@@ -101,13 +101,13 @@ The flag `-E` allows you to waive the error handling; thus, when the tester enco
 
 #### Example
 ```sh
-python ./main.py -u 'simple loop' -E
+python ./brewtest.py -u 'simple loop' -E
 ```
 
 ### Help
 The `-h` flag shows extended information about each flag.
-```
-python ./main.py -h
+```sh
+python ./brewtest.py -h
 ```
 It always has the up-to-date information about all flags. You can also feed its output to ChatGPT so that it knows how to generate a command for you.
 
@@ -245,6 +245,6 @@ ErrorType.NAME_ERROR
 
 ## Licensing and Attribution
 
-This is an unlicensed repository. My contribution are the files `tester.py`, `testersetup.py`, `testsuitev#.md`, `main.py`, and `arghelper.py`.
+This is an unlicensed repository. My contribution are the files in the `testutils`, `testsuitev#.md`, and `brewtest.py`.
 
 Anything else was primarily written by [Carey Nachenberg](http://careynachenberg.weebly.com/), with support from his TAs for the [Fall 2024 iteration of CS 131](https://ucla-cs-131.github.io/fall-24-website/).
