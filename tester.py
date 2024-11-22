@@ -98,7 +98,7 @@ class TesterBase:
     CODE = "code"
     USER_INPUT = "stdin"
     PROG_OUTPUT = "stdout"
-    ERROR_OUTPUT = "error"
+    ERROR_OUTPUT = "stderr"
     LINE_NUMBER = "linenum"
     TAB = "  "
 
@@ -115,7 +115,7 @@ class TesterBase:
 
         with open(test_path) as file:
             for num, line in enumerate(file):
-                self.__curr_line = num
+                self.__curr_line = num + 1
                 lnw = line.rstrip("\n")
                 lsp = line.rstrip()
 
@@ -125,7 +125,7 @@ class TesterBase:
                 if whitelist.match(lsp):
                     continue  # ignore line
 
-                state = self.advance_fsm(state, lnw, num + 1)
+                state = self.advance_fsm(state, lnw)
 
         self.__curr_line = None
 
@@ -213,14 +213,15 @@ class TesterBase:
             return False
 
         match state:
-            case "code" | "stdin" | "stdout" | "error":
+            case "code" | "stdin" | "stdout" | "stderr":
                 self.__key_map[-1][state].append(line)
                 return True
 
             case _:
                 return False
 
-    def advance_fsm(self, state, line, lnum):
+    def advance_fsm(self, state, line):
+        lnum = self.__curr_line
         FSM = {
             None: [(r"^# ", "title")],
             "title": [(r"^## ", "section")],
@@ -231,9 +232,9 @@ class TesterBase:
             "stdin": [(r"^```", "stdin-end")],
             "stdin-end": [(r"^```", "stdout")],
             "stdout": [(r"^```", "stdout-end")],
-            "stdout-end": [(r"^```", "error")],
-            "error": [(r"^```", "error-end")],
-            "error-end": [(r"^### ", "unit"), (r"^## ", "section")],
+            "stdout-end": [(r"^```", "stderr")],
+            "stderr": [(r"^```", "stderr-end")],
+            "stderr-end": [(r"^### ", "unit"), (r"^## ", "section")],
         }
 
         entry_state = state
@@ -244,8 +245,11 @@ class TesterBase:
         if entry_state == state:
             full_path = os.path.abspath(self.test_path)
             msg = "stale state transition found"
-            if line and line.startswith("#"):
-                msg += ". Possibly incorrectly nested title"
+            if state not in {None, "title", "section", "unit"}:
+                msg += ". Incorrect number of code blocks or a typo."
+                marks = (1, len(line))
+            elif line and line.startswith("#"):
+                msg += ". Possibly an incorrectly nested heading"
                 marks = (1, line.count("#"))
             else:
                 msg += ". This may be a typo"
@@ -261,7 +265,7 @@ class TesterBase:
             case ("section", "title"):
                 self.add_level(self.__key_map[-1], line, dict())
 
-            case "section", "error-end":
+            case "section", "stderr-end":
                 self.__key_map.pop()
                 self.__key_map.pop()
                 self.add_level(self.__key_map[-1], line, dict())
@@ -269,18 +273,18 @@ class TesterBase:
             case ("unit", "section"):
                 self.add_level(self.__key_map[-1], line, dict({"linenum": lnum}))
 
-            case "unit", "error-end":
+            case "unit", "stderr-end":
                 self.__key_map.pop()
                 self.add_level(self.__key_map[-1], line, dict({"linenum": lnum}))
 
-            case ("code", _) | ("stdin", _) | ("stdout", _) | ("error", _):
+            case ("code", _) | ("stdin", _) | ("stdout", _) | ("stderr", _):
                 self.add_item(self.__key_map[-1], state, [])
 
             case (
                 ("code-end", _)
                 | ("stdin-end", _)
                 | ("stdout-end", _)
-                | ("error-end", _)
+                | ("stderr-end", _)
             ):
                 pass
 

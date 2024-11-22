@@ -2,6 +2,7 @@ import io
 import os
 import re
 import zipfile
+from tester import ParseError
 
 
 def askUser(msg: str):
@@ -16,19 +17,22 @@ class TestCaseParser:
     CODE = "code"
     USER_INPUT = "stdin"
     PROG_OUTPUT = "stdout"
-    ERROR_OUTPUT = "error"
+    ERROR_OUTPUT = "stderr"
+    LINE_NUMBER = "linenum"
     TAB = "  "
 
     def __init__(self, test_path: str):
         self.__ttree: dict[str, dict[str, dict[str, dict[str, list[str]]]]] = dict()
         self.__test_path = test_path
         self.__key_map = []
+        self.__curr_line = None
 
         state = None
         whitelist = re.compile(r"^$|\*[\w ]+\*|^>")
 
         with open(test_path) as file:
-            for line in file:
+            for num, line in enumerate(file):
+                self.__curr_line = num + 1
                 lnw = line.rstrip("\n")
                 lsp = line.rstrip()
 
@@ -39,6 +43,12 @@ class TestCaseParser:
                     continue  # ignore line
 
                 state = self.advance_fsm(state, lnw)
+
+        self.__curr_line = None
+
+    @property
+    def test_path(self):
+        return self.__test_path
 
     def get_cases_tree(self):
         return self.__ttree.items()
@@ -62,7 +72,7 @@ class TestCaseParser:
             return False
 
         match state:
-            case "code" | "stdin" | "stdout" | "error":
+            case "code" | "stdin" | "stdout" | "stderr":
                 self.__key_map[-1][state].append(line)
                 return True
 
@@ -70,6 +80,7 @@ class TestCaseParser:
                 return False
 
     def advance_fsm(self, state, line):
+        lnum = self.__curr_line
         FSM = {
             None: [(r"^# ", "title")],
             "title": [(r"^## ", "section")],
@@ -80,9 +91,9 @@ class TestCaseParser:
             "stdin": [(r"^```", "stdin-end")],
             "stdin-end": [(r"^```", "stdout")],
             "stdout": [(r"^```", "stdout-end")],
-            "stdout-end": [(r"^```", "error")],
-            "error": [(r"^```", "error-end")],
-            "error-end": [(r"^### ", "unit"), (r"^## ", "section")],
+            "stdout-end": [(r"^```", "stderr")],
+            "stderr": [(r"^```", "stderr-end")],
+            "stderr-end": [(r"^### ", "unit"), (r"^## ", "section")],
         }
 
         entry_state = state
@@ -91,9 +102,19 @@ class TestCaseParser:
                 state = next
 
         if entry_state == state:
-            raise SyntaxError(
-                f"Incorrectly formatted test cases. It failed at:" + f"`{line}'"
-            )
+            full_path = os.path.abspath(self.test_path)
+            msg = "stale state transition found"
+            if state not in {None, "title", "section", "unit"}:
+                msg += ". Incorrect number of code blocks or a typo."
+                marks = (1, len(line))
+            elif line and line.startswith("#"):
+                msg += ". Possibly an incorrectly nested heading"
+                marks = (1, line.count("#"))
+            else:
+                msg += ". This may be a typo"
+                marks = (1, len(line))
+
+            raise ParseError(msg, full_path, lnum, line, marks)
 
         match state, entry_state:
             case "title", None:
@@ -103,29 +124,34 @@ class TestCaseParser:
             case ("section", "title") | ("unit", "section"):
                 self.add_level(self.__key_map[-1], line, dict())
 
-            case "section", "error-end":
+            case "section", "stderr-end":
                 self.__key_map.pop()
                 self.__key_map.pop()
                 self.add_level(self.__key_map[-1], line, dict())
 
-            case "unit", "error-end":
+            case "unit", "stderr-end":
                 self.__key_map.pop()
                 self.add_level(self.__key_map[-1], line, dict())
 
-            case ("code", _) | ("stdin", _) | ("stdout", _) | ("error", _):
+            case ("code", _) | ("stdin", _) | ("stdout", _) | ("stderr", _):
                 self.add_item(self.__key_map[-1], state, [])
 
             case (
                 ("code-end", _)
                 | ("stdin-end", _)
                 | ("stdout-end", _)
-                | ("error-end", _)
+                | ("stderr-end", _)
             ):
                 pass
 
             case _:
-                raise SyntaxError(
-                    f"Fatal error at:" + f"`{line}'.\nInvalid state transition."
+                full_path = os.path.abspath(self.test_path)
+                raise ParseError(
+                    "unexpected error due to invalid state transition",
+                    full_path,
+                    lnum,
+                    line,
+                    (0, 0),
                 )
 
         return state
