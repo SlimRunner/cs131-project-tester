@@ -141,7 +141,7 @@ class TesterBase:
 
     def validate_uniqueness(self, item: dict, key: str):
         if key in item:
-            lnum = self.__curr_line + 1
+            lnum = self.__curr_line
             full_path = os.path.abspath(self.test_path)
             raise ParseError(
                 "duplicate entry in test suite", full_path, lnum, key, (5, len(key))

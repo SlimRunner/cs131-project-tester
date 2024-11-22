@@ -55,8 +55,11 @@ class TestCaseParser:
 
     def validate_uniqueness(self, item: dict, key: str):
         if key in item:
-            nice_path = os.path.relpath(self.__test_path)
-            raise SystemExit(f"`{key}' is a duplicate entry in {nice_path}")
+            lnum = self.__curr_line
+            full_path = os.path.abspath(self.test_path)
+            raise ParseError(
+                "duplicate entry in test suite", full_path, lnum, key, (5, len(key))
+            )
 
     def add_level(self, active_item: dict, key: str, payload):
         self.validate_uniqueness(active_item, key)
