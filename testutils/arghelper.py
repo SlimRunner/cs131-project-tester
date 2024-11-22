@@ -143,7 +143,7 @@ class ArgsWrapper:
 
 def getArguments(*args: str) -> ArgsWrapper:
     arg_parser = ArgumentParser(
-        prog="main",
+        prog="brewtest",
         description="Runs Brewin programs from a markdown file.",
         formatter_class=BlankLinesHelpFormatter,
     )
