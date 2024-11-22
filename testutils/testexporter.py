@@ -2,7 +2,7 @@ import io
 import os
 import re
 import zipfile
-from tester import ParseError
+from testutils.tester import ParseError
 
 
 def askUser(msg: str):

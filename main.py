@@ -1,7 +1,7 @@
-from tester import Tester, BatchRun
-from arghelper import getArguments, TestingOptions, ArgsWrapper
-from testexporter import TestCaseExporter
-from testersetup import (
+from testutils.tester import Tester, BatchRun
+from testutils.arghelper import getArguments, TestingOptions, ArgsWrapper
+from testutils.testexporter import TestCaseExporter
+from testutils.testersetup import (
     find_projects,
     choose_project,
     choose_latest_project,
