@@ -1,5 +1,119 @@
 # Unit Tests V4
 
+## Eager-Like Behavior
+
+### Sequential Prints
+
+*code*
+```go
+func main() {
+  var x;
+  x = "asd";
+  print(x);
+  x = 5;
+  print(x);
+  x = false;
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+asd
+5
+false
+```
+
+*stderr*
+```
+```
+
+## Lazy Evaluation
+
+### Phantom Print
+
+*code*
+```go
+func main() {
+  var x;
+  x = print(x) + "asd";
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+```
+
+### Phantom Input
+
+*code*
+```go
+func main() {
+  var x;
+  x = inputi(x);
+  var y;
+  y = inputs(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+```
+
+### Override Lazy Input
+
+> this test depends on [this other test](#phantom-input)
+
+*code*
+```go
+func main() {
+  var x;
+  x = inputi(x);
+  var y;
+  y = inputs(x);
+  x = "asd";
+  y = 42;
+  print(x + "f");
+  print(y / 2);
+}
+```
+
+*stdin*
+```
+1984
+literally
+```
+
+*stdout*
+```
+asdf
+21
+```
+
+*stderr*
+```
+```
+
 ## Incorrectness Autograder Cases
 
 ### text exception 2
