@@ -322,11 +322,12 @@ class Tester(TesterBase):
                 self.callback(program_source)
 
             except Exception as e:
-                err_split = e.args[0].split(":", 1)
+                err_1st = e.args[0] if e.args else str(e)
+                err_split = err_1st.split(":", 1)
                 if len(err_split) == 2:
                     error_name, error_definition = err_split
                 else:
-                    error_name, error_definition = (e.args[0], "")
+                    error_name, error_definition = (err_1st, "")
                 print(error_name, file=sys.stderr)
                 if raise_errors:
                     raise e
@@ -456,7 +457,7 @@ class BatchRun(TesterBase):
                 self.callback(program_source)
 
             except Exception as e:
-                error_message = e.args[0]
+                error_message = e.args[0] if e.args else str(e)
                 print(error_message)
                 if raise_errors:
                     raise e
