@@ -114,6 +114,235 @@ asdf
 ```
 ```
 
+## Legacy V2
+
+### Arithmetic Correctness
+
+*code*
+```go
+func main() {
+  var a;
+  var b;
+  a = 5;
+  b = 7;
+
+  var c;
+  c = (a * b - 11 * a / 3) / (b - a);
+
+  print(c * c - (c + b));
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+49
+```
+
+*stderr*
+```
+```
+
+### Type Compat - Int Bool
+
+*code*
+```go
+func main() {
+  print(1 + false);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Type Compat - Arith Bool
+
+*code*
+```go
+func main() {
+  print(false - true);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Type Compat - Cond Int
+
+*code*
+```go
+func main() {
+  print(1 || 1);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Type Compat - Unary Bool
+
+*code*
+```go
+func main() {
+  print(-true);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Boolean Correctness
+
+*code*
+```go
+func main() {
+  var X;
+  var A;
+  var B;
+  var C;
+  var D;
+  var E;
+
+  A = true;
+  B = 5 < 3;
+  C = nil != nil;
+  D = false;
+  E = 0 >= 0;
+
+  print(A);
+  print(B);
+  print(C);
+  print(D);
+  print(E);
+
+  X = ((A || !B) && (C || D)) || (!(A && C) && (B || !E));
+  if (X) {
+    print("X = True");
+  } else {
+    print("X = False");
+  }
+
+  if (inputi("...") < -5) {
+    C = true;
+    print("X = ", ((A || !B) && (C || D)) || (!(A && C) && (B || !E)));
+  }
+}
+```
+
+*stdin*
+```
+-100
+```
+
+*stdout*
+```
+true
+false
+false
+false
+true
+X = False
+...
+X = true
+```
+
+*stderr*
+```
+```
+
+### Mixed Comparison
+
+*code*
+```go
+func main () {
+  var a;
+  var b;
+  var c;
+  var d;
+  var e;
+  a = true;
+  b = 5;
+  c = "5";
+  d = "true";
+  e = nil;
+
+  print(a == b);
+  print(b == c);
+  print(a != d);
+  print(c != d);
+
+  print(e != a);
+  print(e != b);
+  print(e == c);
+  print(e == d);
+  print(e == e);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+false
+false
+true
+true
+true
+true
+false
+false
+true
+```
+
+*stderr*
+```
+```
+
 ## Incorrectness Autograder Cases
 
 ### text exception 2
