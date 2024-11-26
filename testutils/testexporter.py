@@ -217,6 +217,8 @@ class TestCaseExporter(TestCaseParser):
                     pdir = "tests"
                     if len(stderr):
                         pdir = "fails"
+                        if stdout:
+                            this_file.append(stdout)
                         this_file.append(stderr)
                     elif stdout != "":
                         this_file.append(stdout)
