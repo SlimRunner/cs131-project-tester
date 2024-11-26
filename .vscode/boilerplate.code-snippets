@@ -72,14 +72,132 @@
 		],
 		"description": "Adds the FAULT_ERROR name"
 	},
+	"try catch block": {
+		"scope": "markdown,go",
+		"prefix": "try",
+		"body": [
+			"try {",
+			"\t${0:/* try code */}",
+			"}",
+			"catch \"${1:name}\" {",
+			"\t${2:/* error handling */}",
+			"}",
+		],
+		"description": "Adds a try-catch block"
+	},
+	"catch block only": {
+		"scope": "markdown,go",
+		"prefix": "catch",
+		"body": [
+			"catch \"${1:name}\" {",
+			"\t${0:/* error handling */}",
+			"}",
+		],
+		"description": "Adds a new catch block"
+	},
+	"raise statement": {
+		"scope": "markdown,go",
+		"prefix": "raise",
+		"body": [
+			"raise \"${0:name}\";",
+		],
+		"description": "Adds a new catch block"
+	},
+	"add if-else block": {
+		"scope": "markdown,go",
+		"prefix": "ifelse",
+		"body": [
+			"if (${1:true}) {",
+			"\t${0:/* true branch */}",
+			"} else {",
+			"\t${2:/* false branch */}",
+			"}",
+		],
+		"description": "Adds the main function with void type"
+	},
+	"add if block": {
+		"scope": "markdown,go",
+		"prefix": "if",
+		"body": [
+			"if (${1:true}) {",
+			"\t${0:/* true branch */}",
+			"}",
+		],
+		"description": "Adds the main function with void type"
+	},
+	"add for block": {
+		"scope": "markdown,go",
+		"prefix": "for",
+		"body": [
+			"var ${1:i};",
+			"for ($1 = ${2:0}; ${3:$1 < 5}; ${4:$1 = $1 + 1}) {",
+			"\t${0:/* body */}",
+			"}",
+		],
+		"description": "Adds the main function with void type"
+	},
+	"add typed function": {
+		"scope": "markdown,go",
+		"prefix": "func",
+		"body": [
+			"func ${1:name}($3): ${2:void} {",
+			"\t${0:/* body */}",
+			"}",
+		],
+		"description": "Adds the main function with void type"
+	},
+	"add function": {
+		"scope": "markdown,go",
+		"prefix": "func",
+		"body": [
+			"func ${1:name}($2): {",
+			"\t${0:/* body */}",
+			"}",
+		],
+		"description": "Adds the main function with void type"
+	},
+	"main void Function": {
+		"scope": "markdown,go",
+		"prefix": "main",
+		"body": [
+			"func main() void {",
+			"\t${0:/* body */}",
+			"}",
+		],
+		"description": "Adds the main function with void type"
+	},
 	"main Function": {
 		"scope": "markdown,go",
 		"prefix": "main",
 		"body": [
 			"func main() {",
-			"\t$0",
+			"\t${0:/* body */}",
 			"}",
 		],
 		"description": "Adds the main function"
+	},
+	"print function": {
+		"scope": "markdown,go",
+		"prefix": "print",
+		"body": [
+			"print($0);",
+		],
+		"description": "adds a print function"
+	},
+	"inputi function": {
+		"scope": "markdown,go",
+		"prefix": "input",
+		"body": [
+			"inputi($0);",
+		],
+		"description": "adds an inputi function"
+	},
+	"inputs function": {
+		"scope": "markdown,go",
+		"prefix": "input",
+		"body": [
+			"inputs($0);",
+		],
+		"description": "adds an inputs function"
 	},
 }
