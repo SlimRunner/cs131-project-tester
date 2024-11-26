@@ -1,5 +1,74 @@
 # Unit Tests V4
 
+## Exceptions
+
+### Simple Try Catch Hit
+
+*code*
+```go
+func main() {
+  print("start");
+  try {
+    print("enter try");
+    raise "name";
+    print("MUST NOT PRINT");
+  }
+  catch "name" {
+    print("caught");
+  }
+  print("continue");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+start
+enter try
+caught
+continue
+```
+
+*stderr*
+```
+```
+
+### Simple Try Catch Miss
+
+*code*
+```go
+func main() {
+  print("start");
+  try {
+    print("enter try");
+    raise "name";
+    print("MUST NOT PRINT - try");
+  }
+  catch "not name" {
+    print("MUST NOT PRINT - catch");
+  }
+  print("MUST NOT PRINT - main");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+start
+enter try
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
 ## Eager-Like Behavior
 
 ### Sequential Prints
@@ -287,6 +356,9 @@ func main() {
 *stdin*
 ```
 ```
+
+> None is undefined behavior, but there was no other way of eagerly
+> evaluating x. You may change that as you wish.
 
 *stdout*
 ```
