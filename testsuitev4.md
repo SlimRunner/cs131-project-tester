@@ -32,6 +32,32 @@ false
 ```
 ```
 
+### For-header local scope access
+
+*code*
+```go
+func main() {
+  var x;
+  for (x = 0; x == 1; x = x) {
+    print("should not print");
+  }
+  print("asd");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+asd
+```
+
+*stderr*
+```
+```
+
 ## Lazy Evaluation
 
 ### Phantom Print
@@ -114,7 +140,274 @@ asdf
 ```
 ```
 
-## Legacy V2
+### Eager input func call
+
+*code*
+```go
+func main() {
+  var x;
+  x = 5;
+  inputi("foo");
+  print("bar");
+  print(x);
+}
+```
+
+*stdin*
+```
+0
+```
+
+*stdout*
+```
+foo
+bar
+5
+```
+
+*stderr*
+```
+```
+
+### Lazy input func call
+
+*code*
+```go
+func main() {
+  var x;
+  x = inputi("foo");
+  print("bar");
+  print(x);
+}
+```
+
+*stdin*
+```
+57
+```
+
+*stdout*
+```
+bar
+foo
+57
+```
+
+*stderr*
+```
+```
+
+### Test cached eval
+
+*code*
+```go
+func foo(a) {
+  print("a: ", a);
+  return a + 1;
+}
+
+func main() {
+  var x;
+  x = foo(5);
+  print("x: ", x);
+  print("x: ", x);
+  x = foo(-1);
+  print("x: ", x);
+  print("x: ", x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+a: 5
+x: 6
+x: 6
+a: -1
+x: 0
+x: 0
+```
+
+*stderr*
+```
+```
+
+### Lazy self-ref fcall arg
+
+*code*
+```go
+func foo(a) {
+  print("a: ", a);
+  return a - a / 3;
+}
+
+func main() {
+  var x;
+  x = 42;
+  x = foo(x);
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+a: 42
+28
+```
+
+*stderr*
+```
+```
+
+### Lazy self-ref print arg
+
+*code*
+```go
+func foo(a) {
+  print("in foo");
+  print(a);
+}
+
+func main() {
+  var x;
+  x = 42;
+  x = print(x);
+  print("mark");
+  foo(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+mark
+in foo
+42
+None
+```
+
+*stderr*
+```
+```
+
+### Lazy self-ref input arg
+
+*code*
+```go
+func foo(a) {
+  print("in foo");
+  print(a);
+}
+
+func main() {
+  var x;
+  x = "prompt";
+  x = inputi(x);
+  print("mark");
+  foo(x);
+}
+```
+
+*stdin*
+```
+-53
+```
+
+*stdout*
+```
+mark
+in foo
+prompt
+-53
+```
+
+*stderr*
+```
+```
+
+### Lazy eval outside scope
+
+*code*
+```go
+func foo(a) {
+  print("a: ", a);
+  return a + 1;
+}
+
+func bar(b) {
+  print(b);
+}
+
+func main() {
+  var x;
+  x = foo(5);
+  bar(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+a: 5
+6
+```
+
+*stderr*
+```
+```
+
+### Eager for-stmt header
+
+*code*
+```go
+func foo(a) {
+  print("a: ", a);
+  return a + 1;
+}
+
+func main() {
+  var x;
+  for (x = 0; x < 3; x = foo(x)) {
+    print("x: ", x);
+    var q;
+  }
+  print("end");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+x: 0
+a: 0
+x: 1
+a: 1
+x: 2
+a: 2
+end
+```
+
+*stderr*
+```
+```
+
+## Legacy V2 - Operators
 
 ### Arithmetic Correctness
 
