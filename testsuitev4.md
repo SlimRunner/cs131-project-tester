@@ -479,6 +479,259 @@ end
 ```
 ```
 
+### Deeply Nested Lazy Evaluation and Cache
+
+*code*
+```go
+func bar(s, n) {
+  var res;
+  print("bar -> ", s, ":", n);
+  if (n < 20) {
+    res = "y" + foo("b", n - 1) + s;
+  } else {
+    res = "|";
+  }
+  return res;
+}
+
+func foo(s, n) {
+  var res;
+  print("foo -> ", s, ":", n);
+  if (n < 7) {
+    res = s + bar("x", n * 2) + "a";
+  } else {
+    res = "&";
+  }
+  return res;
+}
+
+func main() {
+  var x;
+  var y;
+  x = foo("-", 2);
+  y = bar("-", 3);
+  print(x);
+  print(y);
+  print(x);
+  print(y);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+foo -> -:2
+bar -> x:4
+foo -> b:3
+bar -> x:6
+foo -> b:5
+bar -> x:10
+foo -> b:9
+-ybyby&xaxaxa
+bar -> -:3
+foo -> b:2
+bar -> x:4
+foo -> b:3
+bar -> x:6
+foo -> b:5
+bar -> x:10
+foo -> b:9
+ybybyby&xaxaxa-
+-ybyby&xaxaxa
+ybybyby&xaxaxa-
+```
+
+*stderr*
+```
+```
+
+### Function Order of Eval
+
+*code*
+```go
+func foo() {
+  print("first");
+  return 1;
+}
+
+func bar() {
+  print("second");
+  return 2;
+}
+
+func baz() {
+  print("third");
+  return 3;
+}
+
+func main() {
+  var x;
+  x = foo() + bar() * baz();
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+first
+second
+third
+7
+```
+
+*stderr*
+```
+```
+
+### Lazy as non-eval param
+
+*code*
+```go
+func foo() {
+  print("first");
+  return 1;
+}
+
+func bar() {
+  print("second");
+  return 2;
+}
+
+func baz() {
+  print("third");
+  return 3;
+}
+
+func noop(a) {
+  return nil;
+}
+
+func eval(a) {
+  return nil == noop(a);
+}
+
+func eval_direct(a) {
+  return nil == a;
+}
+
+func main() {
+  var x;
+  x = foo() + bar() * baz();
+  print("nothing");
+  noop(x);
+  print("still nothing");
+  noop(x);
+  print("still nothing");
+  print(eval(x));
+  print(eval_direct(x));
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+nothing
+still nothing
+still nothing
+true
+first
+second
+third
+false
+```
+
+*stderr*
+```
+```
+
+### Lazy Undef Var Error
+
+*code*
+```go
+func main() {
+  var a;
+  a = x;
+  print("should not crash yet");
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+should not crash yet
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Lazy Undef Func Error
+
+*code*
+```go
+func main() {
+  var a;
+  a = foo(5);
+  print("should not crash yet");
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+should not crash yet
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Lazy Undef Func and Vars Error
+
+*code*
+```go
+func main() {
+  var a;
+  a = foo(a ,b, c, d, e);
+  print("should not crash yet");
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+should not crash yet
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
 ## Legacy V2 - Input and Output
 
 ### Print Returns nil
