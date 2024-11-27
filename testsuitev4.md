@@ -2,6 +2,235 @@
 
 ## Exceptions
 
+### Uncaught Division by Zero
+
+*code*
+```go
+func main() {
+  print(1 / 0);
+  print("must not print");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
+### Lazy Uncaught Division by Zero
+
+*code*
+```go
+func foo(a) {
+  return a / 0;
+}
+
+func main() {
+  var x;
+  x = 123;
+  print(x);
+  x = foo(x);
+  print("omae wa...");
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+123
+omae wa...
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
+### Deeply Nested Division by Zero
+
+*code*
+```go
+func mult3(n) {
+  print(1000 / (n + 868));
+  var res;
+  res = div5shift(n * 3);
+  return res;
+}
+
+func div5shift(n) {
+  if (n == -1161) {
+    print(n);
+  } else {
+    print(1000 / (n + 400));
+  }
+  var res;
+  res = mult3(n / 5 - 400);
+  return res;
+}
+
+func main() {
+  var x;
+  x = mult3(23);
+  print("no error yet");
+  print(x);
+  print("must not print");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+no error yet
+1
+2
+2
+-1161
+4
+-1
+11
+-1
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
+### Uncaught Raised Error
+
+*code*
+```go
+func main() {
+  raise "foobar";
+  print("must not print");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
+### Lazy Uncaught Raised Error
+
+*code*
+```go
+func foo(a) {
+  raise a;
+  print("must not print");
+  return "404: return value not found";
+}
+
+func main() {
+  var x;
+  x = "lazy error";
+  print(x);
+  x = foo(x);
+  print("omae wa...");
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+lazy error
+omae wa...
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
+### Deeply Nested Lazy Error
+
+*code*
+```go
+func seppuku(err) {
+  raise err;
+}
+
+func bar(s, n) {
+  var res;
+  print("bar -> ", s, ":", n);
+  if (n < 20) {
+    res = "y" + foo("b", n - 1) + s;
+  } else {
+    res = "|";
+  }
+  return res;
+}
+
+func foo(s, n) {
+  var res;
+  print("foo -> ", s, ":", n);
+  if (n < 7) {
+    res = s + bar("x", n * 2) + "a";
+  } else {
+    res = "&";
+  }
+  if (n == 3) {
+    seppuku(res);
+  }
+  return res;
+}
+
+func main() {
+  var x;
+  x = foo("-", 2);
+  print(x);
+  print("this should not print");
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+foo -> -:2
+bar -> x:4
+foo -> b:3
+bar -> x:6
+foo -> b:5
+bar -> x:10
+foo -> b:9
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
 ### Simple Try Catch Hit
 
 *code*
