@@ -1938,3 +1938,512 @@ true
 *stderr*
 ```
 ```
+
+## Spec Examples
+
+### Need Semantics Simple Prog
+
+*code*
+```go
+func main() {
+  var result;
+  result = f(3) + 10;
+  print("done with call!");
+  print(result);  /* evaluation of result happens here */
+  print("about to print result again");
+  print(result);
+}
+
+func f(x) {
+  print("f is running");
+  var y;
+  y = 2 * x;
+  return y;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+done with call!
+f is running
+16
+about to print result again
+16
+```
+
+*stderr*
+```
+```
+
+### Except Handling Simple Prog
+
+*code*
+```go
+func foo() {
+  print("F1");
+  raise "except1";
+  print("F3");
+}
+
+func bar() {
+  try {
+    print("B1");
+    foo();
+    print("B2");
+  }
+  catch "except2" {
+    print("B3");
+  }
+  print("B4");
+}
+
+func main() {
+  try {
+    print("M1");
+    bar();
+    print("M2");
+  }
+  catch "except1" {
+    print("M3");
+  }
+  catch "except3" {
+    print("M4");
+  }
+  print("M5");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+M1
+B1
+F1
+M3
+M5
+```
+
+*stderr*
+```
+```
+
+### Short Circuiting Example
+
+*code*
+```go
+func foo() {
+  print("foo");
+  return true;
+}
+
+func bar() {
+  print("bar");
+  return false;
+}
+
+func main() {
+  print(foo() || bar() || foo() || bar());
+  print("done");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+foo
+true
+done
+```
+
+*stderr*
+```
+```
+
+### Lazy Eval Demo
+
+> I took some liberties with this one
+
+*code*
+```go
+func foo() {
+  print("eager call");
+  return 96;
+}
+
+func bar() {
+  print("must never be seen");
+  raise "foobar";
+  return 1 / 0;
+}
+
+func pcall() {
+  print("x");
+  foo();
+  inputi("Enter a number");
+  var a;
+  var n;
+  a = bar();
+  n = inputi("Enter a number");
+  return (print(n) == nil);
+}
+
+func main() {
+  print(pcall());
+}
+```
+
+*stdin*
+```
+5
+42
+```
+
+*stdout*
+```
+x
+eager call
+Enter a number
+Enter a number
+42
+true
+```
+
+*stderr*
+```
+```
+
+### Lazy Eval Example
+
+*code*
+```go
+func main() {
+  var result;
+  result = f(3) + 10;
+  print("first line");
+  if (-result > 5) {
+    print(result, " greater than 5");
+  }
+
+  var i;
+  for (i = 0; i < 10; i = i + 1) {
+    print(i);
+  }
+
+  result = "except" + "9";
+  raise result;
+}
+
+func f(x) {
+  print("f has been evaluated");
+  return x * -8;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+first line
+f has been evaluated
+-14 greater than 5
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
+### Lazy Error Example
+
+*code*
+```go
+func faultyFunction() {
+  print(undefinedVar); /* Name error occurs here when evaluated */
+}
+
+func main() {
+  var result;
+  result = faultyFunction();
+  print("Assigned result!");
+
+  print(result);      /* Error will occur when result is evaluated */
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+Assigned result!
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Lazy Raise in Function Example
+
+*code*
+```go
+func functionThatRaises() {
+  raise "some_exception";  /* Exception occurs here when func is called */
+  return 0;
+}
+
+func main() {
+  var result;
+  result = functionThatRaises();
+  print("Assigned result!");
+  /* Exception will occur when result is evaluated */
+  print(result, " was what we got!");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+Assigned result!
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
+### Lazy error example
+
+> this test case helped me fix test_error3 and test_lazy_error7
+
+*code*
+```go
+func main() {
+  var x;
+  x = foo(y);
+  print("OK");
+  print(x);  /* NAME_ERROR due to undefined y is deferred to this line */
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+OK
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Eager error example
+
+> this test case helped me fix test_error3 and test_lazy_error7
+
+*code*
+```go
+func main() {
+  x = foo();  /* generates NAME_ERROR immediately since x is undefined */
+              /* and x is not part of expression */
+  print("OK");
+  print(x);
+}
+
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Try Catch Example
+
+*code*
+```go
+func foo() {
+  try {
+    raise "z";
+  }
+  catch "x" {
+    print("x");
+  }
+  catch "y" {
+    print("y");
+  }
+  catch "z" {
+    print("z");
+    raise "a";
+  }
+  print("q");
+}
+
+func main() {
+  try {
+    foo();
+    print("b");
+  }
+  catch "a" {
+    print("a");
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+z
+a
+```
+
+*stderr*
+```
+```
+
+### Lazy Error Handling example
+
+*code*
+```go
+func error_function() {
+  raise "error";
+  return 0;
+}
+
+func main() {
+  var x;
+  x = error_function() + 10;  /* Exception occurs when x is evaluated */
+  print("Before x is evaluated");
+  try {
+    print(x);  /* Evaluation of x happens here */
+  }
+  catch "error" {
+    print("Caught an error during evaluation of x");
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+Before x is evaluated
+Caught an error during evaluation of x
+```
+
+*stderr*
+```
+```
+
+### Div0 Demo
+
+*code*
+```go
+func divide(a, b) {
+  return a / b;
+}
+
+func main() {
+  try {
+    var result;
+    result = divide(10, 0);  /* evaluation deferred due to laziness */
+    print("Result: ", result); /* evaluation occurs here */
+  }
+  catch "div0" {
+    print("Caught division by zero!");
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+Caught division by zero!
+```
+
+*stderr*
+```
+```
+
+### Shortcircuit Eval Example
+
+*code*
+```go
+func t() {
+  print("t");
+  return true;
+}
+
+func f() {
+  print("f");
+  return false;
+}
+
+func main() {
+  print(t() && f());
+  print("---");
+  print(f() && t());
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+t
+f
+false
+---
+f
+false
+```
+
+*stderr*
+```
+```
