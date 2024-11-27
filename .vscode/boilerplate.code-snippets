@@ -150,7 +150,7 @@
 		"scope": "markdown,go",
 		"prefix": "func",
 		"body": [
-			"func ${1:name}($2): {",
+			"func ${1:name}($2) {",
 			"\t${0:/* body */}",
 			"}",
 		],
@@ -160,7 +160,7 @@
 		"scope": "markdown,go",
 		"prefix": "main",
 		"body": [
-			"func main() void {",
+			"func main(): void {",
 			"\t${0:/* body */}",
 			"}",
 		],
