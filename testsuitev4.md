@@ -298,6 +298,706 @@ enter try
 ErrorType.FAULT_ERROR
 ```
 
+### Try Catch Shadowing
+
+*code*
+```go
+func main() {
+  var a;
+  try {
+    var a;
+    print("a has been shadowed");
+    var a;
+  }
+  catch "miss" {
+    print("MUST NOT PRINT - catch");
+  }
+  print("MUST NOT PRINT - main");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+a has been shadowed
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Try Catch Shadowing Validity
+
+*code*
+```go
+func main() {
+  var a;
+  a = 45;
+  try {
+    print(a);
+    a = 12;
+    var a;
+    a = "abc";
+    print("a has been shadowed and modified");
+    print(a);
+    raise "raid shadow legends";
+  }
+  catch "raid shadow legends" {
+    print(a);
+  }
+  print(a);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+45
+a has been shadowed and modified
+abc
+12
+12
+```
+
+*stderr*
+```
+```
+
+### Try Catch Scope Unwinding
+
+*code*
+```go
+func main() {
+  var a;
+  a = 45;
+  try {
+    try {
+      try {
+        if (true) {
+          var a;
+          for (a = ""; a != "00000"; a = a + "0") {
+            print(a);
+            if (a == "000") {
+              raise "inception";
+            }
+          }
+        }
+      }
+      catch "noop" {
+        print("noop");
+      }
+    }
+    catch "noop" {
+      print("noop");
+    }
+  }
+  catch "inception" {
+    print(a);
+    var a;
+    a = nil;
+    print(a != nil);
+  }
+  print(a);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+
+0
+00
+000
+45
+false
+45
+```
+
+*stderr*
+```
+```
+
+### Ill formed raise statement nil
+
+*code*
+```go
+func main() {
+  print("entry");
+  raise nil;
+  print("exit");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+entry
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Ill formed raise statement int
+
+*code*
+```go
+func main() {
+  print("entry");
+  raise 5;
+  print("exit");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+entry
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Ill formed raise statement bool
+
+*code*
+```go
+func main() {
+  print("entry");
+  raise true;
+  print("exit");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+entry
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Bad variable value for raise (lazy)
+
+*code*
+```go
+func foo() {
+  print("lazy int");
+  return 24;
+}
+
+func main() {
+  var x;
+  x = foo();
+  print("entry");
+  raise x;
+  print("exit");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+entry
+lazy int
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Except within expression
+
+*code*
+```go
+func f1() {
+  print("f1");
+  return 1;
+}
+
+func f2() {
+  print("f2");
+  return 2;
+}
+
+func f3() {
+  print("f3");
+  return 3;
+}
+
+func fe() {
+  print("fe");
+  raise "ferr";
+  print("must not print");
+  return nil;
+}
+
+func main() {
+  var x;
+  x = f1() + f2() + f3() + f2() + f1() + f2() + f3() + fe() + f2() + f3() + f4() + f5() + f6();
+  print("no error yet");
+  try {
+    print("inside try");
+    print(x);
+    print("post try error. must not print");
+  }
+  catch "ferr" {
+    x = f1() + f3() + f3() + f2() + f2() + f3()+ f1();
+    print(x);
+    print("ferr was caught");
+  }
+  print(x + 3);
+  print("exit");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+no error yet
+inside try
+f1
+f2
+f3
+f2
+f1
+f2
+f3
+fe
+f1
+f3
+f3
+f2
+f2
+f3
+f1
+15
+ferr was caught
+18
+exit
+```
+
+*stderr*
+```
+```
+
+### Indirect Except Catch
+
+*code*
+```go
+func foo() {
+  print("foo");
+  raise "foo";
+  print("must not print");
+  return 1;
+}
+
+func main() {
+  try {
+    print("before error");
+    foo();
+    print("after error");
+  }
+  catch "foo" {
+    print("error from foo");
+  }
+  print("normal exit");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+before error
+foo
+error from foo
+normal exit
+```
+
+*stderr*
+```
+```
+
+### Except in if-condition
+
+*code*
+```go
+func foo() {
+  print("foo ran");
+  return 0 / 1;
+}
+
+func main() {
+  try {
+    if (1 / 0 == foo()) {
+      print("whoops");
+    }
+  }
+  catch "div0" {
+    print("div0 in if-condition");
+    raise "div0";
+  }
+  print("must not print");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+div0 in if-condition
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
+### Except in for-header
+
+> this exception depends heavily on correct scoping so make sure you
+> pass that before checking this one
+
+*code*
+```go
+func ferr() {
+  raise "ferr";
+}
+
+func div0() {
+  print(0 / 0);
+}
+
+func main() {
+  var i;
+  i = 5;
+
+  print("test assignment");
+  try {
+    var i;
+    for (i = ferr(); i < 5; i = i + 1) {
+      print("noop");
+    }
+  }
+  catch "div0" {
+    print("must not print");
+    raise "div0";
+  }
+  catch "ferr" {
+    print("ferr: i -> ", i);
+    i = i + 5;
+  }
+
+  print("test condition");
+  try {
+    var i;
+    for (i = 0; ferr(); i = i + 1) {
+      print("noop");
+    }
+  }
+  catch "div0" {
+    print("must not print");
+    raise "div0";
+  }
+  catch "ferr" {
+    print("ferr: i -> ", i);
+    i = i + 5;
+  }
+
+  print("test update");
+  try {
+    var i;
+    for (i = 0; i < 5; i = ferr()) {
+      print("noop");
+    }
+  }
+  catch "div0" {
+    print("must not print");
+    raise "div0";
+  }
+  catch "ferr" {
+    print("ferr: i -> ", i);
+    i = i + 5;
+  }
+
+  print("test body");
+  try {
+    var i;
+    for (i = 0; i < 5; i = i + 1) {
+      div0();
+      print("noop");
+    }
+  }
+  catch "div0" {
+    print("caught last div0");
+  }
+  catch "ferr" {
+    print("ferr: i -> ", i);
+    i = i + 5;
+    raise "ferr";
+  }
+
+  print("final i = ", i);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+test assignment
+ferr: i -> 5
+test condition
+ferr: i -> 10
+test update
+noop
+ferr: i -> 15
+test body
+caught last div0
+final i = 20
+```
+
+*stderr*
+```
+```
+
+### Test nested try-catch
+
+*code*
+```go
+func ferr() {
+  raise "ferr";
+}
+
+func main() {
+  try {
+    print(5, "asd", nil == nil, false, ferr());
+  }
+  catch "ferr" {
+    print("first catch");
+    try {
+      inputs(ferr());
+    }
+    catch "ferr" {
+      print("second catch");
+      try {
+        inputi(ferr());
+      }
+      catch "ferr" {
+        print("last catch");
+      }
+    }
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+first catch
+second catch
+last catch
+```
+
+*stderr*
+```
+```
+
+### Name Error always Falls through
+
+*code*
+```go
+func main() {
+  try {
+    var a;
+    var a;
+  }
+  catch "no match" {
+    print("must not print");
+  }
+  print("must not print");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Type Error always Falls through
+
+*code*
+```go
+func main() {
+  try {
+    var a;
+    a = 1 + "1";
+    print(a);
+  }
+  catch "no match" {
+    print("must not print");
+  }
+  print("must not print");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### Empty String is a valid catch
+
+*code*
+```go
+func main() {
+  try {
+    try {
+      raise "";
+    }
+    catch "name" {
+      return;
+    }
+  }
+  catch "no match" {
+    print("must not print");
+  }
+  catch "" {
+    print("hello");
+  }
+  print("world");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+hello
+world
+```
+
+*stderr*
+```
+```
+
+### Return inside Try Catch
+
+*code*
+```go
+func try_ret(a) {
+  print("t_ret");
+  try {
+    return a * 2;
+  }
+  catch "A" {
+    raise "B";
+  }
+}
+
+func catch_ret(a) {
+  print("c_ret");
+  try {
+    raise "A";
+  }
+  catch "A" {
+    return a + "_is_bestagon";
+    raise "B";
+  }
+}
+
+func main() {
+  var x;
+  var y;
+  x = try_ret(3);
+  y = catch_ret("_hexagon");
+  print("---");
+  print(x, y);
+  print(try_ret(3), catch_ret("_hexagon"));
+  print(x, y);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+---
+t_ret
+c_ret
+6_hexagon_is_bestagon
+t_ret
+c_ret
+6_hexagon_is_bestagon
+6_hexagon_is_bestagon
+```
+
+*stderr*
+```
+```
+
 ## Eager-Like Behavior
 
 ### Sequential Prints
@@ -324,6 +1024,70 @@ func main() {
 asd
 5
 false
+```
+
+*stderr*
+```
+```
+
+### nil comparison
+
+*code*
+```go
+func foo() {
+  var x;
+}
+
+func bar() {
+  return;
+}
+
+func baz() {
+  return nil;
+}
+
+func main() {
+  var a;
+  var b;
+  var c;
+  c = foo();
+  print(a == b);
+  print(a == 0);
+  print(a == false);
+  print(nil == b);
+  print(nil == 0);
+  print(nil == false);
+  print(c == b);
+  print(c == 0);
+  print(c == false);
+  print(foo() != bar());
+  print(bar() != baz());
+  print(baz() != foo());
+  c = print(baz() != foo());
+  print(c == nil);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+true
+false
+false
+true
+false
+false
+true
+false
+false
+false
+false
+false
+false
+true
 ```
 
 *stderr*
@@ -570,7 +1334,7 @@ a: 42
 ```go
 func foo(a) {
   print("in foo");
-  print(a);
+  print(print("-") == a);
 }
 
 func main() {
@@ -586,15 +1350,13 @@ func main() {
 ```
 ```
 
-> None is undefined behavior, but there was no other way of eagerly
-> evaluating x. You may change that as you wish.
-
 *stdout*
 ```
 mark
 in foo
+-
 42
-None
+true
 ```
 
 *stderr*
