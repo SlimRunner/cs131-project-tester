@@ -1132,6 +1132,204 @@ c_ret
 ```
 ```
 
+### Eager Try-Catch FSM
+
+*code*
+```go
+func main() {
+  try {
+    /* start the FSM at "state1" */
+    fsm_eager("state1");
+  }
+  catch "lazy_final_state" {
+    print("this should not be caught");
+  }
+  catch "final_state" {
+    print("Caught final_state in main");
+  }
+
+  print("normal exit");
+}
+
+func fsm_eager(state) {
+  try {
+    print("In ", state);
+    raise state;
+  }
+  catch "state1" {
+    print("Caught state1, transitioning...");
+    fsm_eager("state2");
+  }
+  catch "state2" {
+    print("Caught state2, transitioning...");
+    fsm_eager("state3");
+  }
+  catch "state3" {
+    print("Caught state3, transitioning...");
+    fsm_eager("final_state");
+  }
+  print("this point should not be reached");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+In state1
+Caught state1, transitioning...
+In state2
+Caught state2, transitioning...
+In state3
+Caught state3, transitioning...
+In final_state
+Caught final_state in main
+normal exit
+```
+
+*stderr*
+```
+```
+
+### Lazy Try-Catch FSM
+
+*code*
+```go
+func main() {
+  var fsmr;
+  try {
+    /* start the FSM at "state1" */
+    fsmr = fsm_lazy("state1");
+  }
+  catch "lazy_final_state" {
+    print("this should not be caught");
+  }
+  catch "final_state" {
+    print("Caught final_state in main");
+  }
+
+  print("normal exit");
+}
+
+func fsm_lazy(state) {
+  try {
+    print("In ", state);
+    raise state;
+  }
+  catch "state1" {
+    print("Caught state1, transitioning...");
+    return fsm_lazy("state2");
+  }
+  catch "state2" {
+    print("Caught state2, transitioning...");
+    return fsm_lazy("state3");
+  }
+  catch "state3" {
+    print("Caught state3, transitioning...");
+    return fsm_lazy("final_state");
+  }
+  print("this point should not be reached");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+normal exit
+```
+
+*stderr*
+```
+```
+
+### Challenge Lazy Error Early Return and Named Errors
+
+*code*
+```go
+func main() {
+  var cz; cz = catchzy();
+  print("no error yet");
+  print(cz);
+}
+
+func catchzy() {
+  var r1;
+  var r2;
+  var r4;
+
+  r4 = lazy_fn(4, "");
+  r2 = lazy_fn(2, "");
+  r1 = lazy_fn(1, "");
+  try {
+    print(r2);
+  }
+  catch "AB" {
+    try {
+      print(r1);
+    }
+    catch "A" {
+      try {
+        return print(r4);
+      }
+      catch "ABCD" {
+        print("unreachable");
+      }
+      print("unreachable");
+    }
+    print("unreachable");
+  }
+
+  print("unreachable");
+}
+
+func lazy_fn(n, s) {
+  if (n == 0) {
+    raise s;
+    print("unreachable");
+  }
+  print(n);
+  return lazy_fn(n - 1, letter(n) + s);
+  print("unreachable");
+}
+
+func letter(n) {
+  if (n == 0) { return "0"; }
+  if (n == 1) { return "A"; }
+  if (n == 2) { return "B"; }
+  if (n == 3) { return "C"; }
+  if (n == 4) { return "D"; }
+  if (n == 5) { return "E"; }
+  if (n == 6) { return "F"; }
+  return X;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+no error yet
+2
+1
+1
+4
+3
+2
+1
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
 ## Eager-Like Behavior
 
 ### Sequential Prints
@@ -1984,6 +2182,89 @@ all good
 
 *stderr*
 ```
+```
+
+### Lazy Invalid Call to input
+
+*code*
+```go
+func main() {
+  var a;
+  var b;
+  print("entry");
+  a = inputi(1, 2, 3);
+  b = inputs("a", "b", "c");
+  print("all good, error was lazy");
+}
+```
+
+*stdin*
+```
+123
+abc
+```
+
+*stdout*
+```
+entry
+all good, error was lazy
+```
+
+*stderr*
+```
+```
+
+### Eager Invalid Call to inputs
+
+*code*
+```go
+func main() {
+  var a;
+  print("entry");
+  inputs("a", "b", "c");
+  print("eager error was not raised");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+entry
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Eager Invalid Call to inputi
+
+*code*
+```go
+func main() {
+  var a;
+  print("entry");
+  inputi("a", "b", "c");
+  print("eager error was not raised");
+}
+```
+
+*stdin*
+```
+abc
+```
+
+*stdout*
+```
+entry
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
 ```
 
 ## Legacy V2 - Input and Output
