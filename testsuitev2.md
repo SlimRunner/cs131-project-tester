@@ -1030,3 +1030,42 @@ The answer to the universe
 *stderr*
 ```
 ```
+
+### For Body Scope
+
+*code*
+```go
+func main() {
+  var a;
+  for (a = ""; a != "00000"; a = a + "0") {
+    print(a);
+    if (a == "000") {
+      return;
+      print("if failed to unwind");
+    }
+    var a;
+    a = "for body scope";
+    print(a);
+  }
+  print("must not print");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+
+for body scope
+0
+for body scope
+00
+for body scope
+000
+```
+
+*stderr*
+```
+```
