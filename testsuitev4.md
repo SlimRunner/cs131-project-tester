@@ -370,13 +370,11 @@ abc
 ```
 ```
 
-### Try Catch Scope Unwinding
+### Try Catch Fallthrough
 
 *code*
 ```go
 func main() {
-  var a;
-  a = 45;
   try {
     try {
       try {
@@ -386,19 +384,90 @@ func main() {
             print(a);
             if (a == "000") {
               raise "inception";
+              print("if did not unwind");
             }
           }
+          print("for and/or if did not unwind");
         }
+        print("try did not catch");
       }
       catch "noop" {
-        print("noop");
+        print("noop is not meant to match inception");
       }
     }
     catch "noop" {
-      print("noop");
+      print("noop is not meant to match inception");
     }
   }
   catch "inception" {
+    print("inception was caught");
+  }
+  print("normal exit");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+
+0
+00
+000
+inception was caught
+normal exit
+```
+
+*stderr*
+```
+```
+
+### Try Catch Scope Unwinding
+
+*code*
+```go
+func main() {
+  var a;
+  a = 45;
+  print(a);
+  try {
+    var a;
+    a = "first try";
+    print(a);
+    try {
+      var a;
+      a = "second try";
+      print(a);
+      try {
+        var a;
+        a = "third try";
+        print(a);
+        if (true) {
+          var a;
+          for (a = ""; a != "00000"; a = a + "0") {
+            print(a);
+            if (a == "000") {
+              raise "E1";
+            }
+            var a;
+            a = "for body scope";
+            print(a);
+          }
+        }
+      }
+      catch "E1" {
+        print(a);
+        raise "E2";
+      }
+    }
+    catch "E2" {
+      print(a);
+      raise "E3";
+    }
+  }
+  catch "E3" {
     print(a);
     var a;
     a = nil;
@@ -414,13 +483,76 @@ func main() {
 
 *stdout*
 ```
+45
+first try
+second try
+third try
+
+for body scope
+0
+for body scope
+00
+for body scope
+000
+second try
+first try
+45
+false
+45
+```
+
+*stderr*
+```
+```
+
+### Try Catch Error Unwinding
+
+*code*
+```go
+func main() {
+  try {
+    try {
+      try {
+        if (true) {
+          var a;
+          for (a = ""; a != "00000"; a = a + "0") {
+            print(a);
+            if (a == "000") {
+              raise "E1";
+              print("if failed to unwind");
+            }
+          }
+          print("for failed to propagate error");
+        }
+        print("if failed to propagate error");
+      }
+      catch "E1" {
+        raise "E2";
+        print("catch E1 failed to unwind");
+      }
+    }
+    catch "E2" {
+      raise "E3";
+      print("catch E2 failed to unwind");
+    }
+  }
+  catch "E3" {
+    print("E1 E2 and E3 were caught");
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
 
 0
 00
 000
-45
-false
-45
+E1 E2 and E3 were caught
 ```
 
 *stderr*
@@ -953,6 +1085,7 @@ func try_ret(a) {
   catch "A" {
     raise "B";
   }
+  print("must not print");
 }
 
 func catch_ret(a) {
@@ -964,6 +1097,7 @@ func catch_ret(a) {
     return a + "_is_bestagon";
     raise "B";
   }
+  print("must not print");
 }
 
 func main() {
@@ -1114,6 +1248,61 @@ func main() {
 *stdout*
 ```
 asd
+```
+
+*stderr*
+```
+```
+
+### If-Return Termination
+
+*code*
+```go
+func main() {
+  if (true) {
+    print("entry");
+    return;
+    print("if-statement failed to stop on return");
+  }
+  print("if-statement failed to exit parent function");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+entry
+```
+
+*stderr*
+```
+```
+
+### For-Return Termination
+
+*code*
+```go
+func main() {
+  var i;
+  for (i = 0; i < 5; i = i + 1) {
+    print("entry");
+    return;
+    print("for-loop failed to stop on return");
+  }
+  print("for-loop failed to exit parent function");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+entry
 ```
 
 *stderr*
@@ -1721,6 +1910,80 @@ should not crash yet
 *stderr*
 ```
 ErrorType.NAME_ERROR
+```
+
+### Lazy argument correctness
+
+*code*
+```go
+func foo(a, b, c, d) {
+  print(a);
+  print(c);
+  return "all good";
+}
+
+func get_num() {
+  print("get num");
+  return 5 * 6;
+}
+
+func get_str() {
+  print("get string");
+  return "5 * 6";
+}
+
+func get_bool() {
+  print("get bool");
+  return !false;
+}
+
+func get_error1() {
+  print("should not get called");
+  var a;
+  var a;
+}
+
+func get_error2() {
+  print("should not get called");
+  undefinedvar = 5;
+}
+
+func raise_error() {
+  print("should not get called");
+  raise "err";
+}
+
+func main() {
+  var x;
+  var y;
+  x = foo(get_num(), get_error2(), get_bool(), does_not_exist());
+  y = foo(get_str(), raise_error(), get_num(), get_error1());
+
+  print(y);
+  print(x);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+get string
+5 * 6
+get num
+30
+all good
+get num
+30
+get bool
+true
+all good
+```
+
+*stderr*
+```
 ```
 
 ## Legacy V2 - Input and Output
