@@ -1073,7 +1073,44 @@ world
 ```
 ```
 
-### Return inside Try Catch
+### Return inside Try Catch 1
+
+*code*
+```go
+func catch_ret() {
+  print("catch_ret entry");
+  try {
+    print("in try");
+    raise "err";
+  }
+  catch "err" {
+    return "ret from catch";
+    print("after return in catch (unreachable)");
+  }
+  print("catch_ret normal exit");
+}
+
+func main() {
+  print(catch_ret());
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+catch_ret entry
+in try
+ret from catch
+```
+
+*stderr*
+```
+```
+
+### Return inside Try Catch 2
 
 *code*
 ```go
@@ -1328,6 +1365,219 @@ no error yet
 *stderr*
 ```
 ErrorType.FAULT_ERROR
+```
+
+### Challenge Branching Exceptions
+
+*code*
+```go
+func main() {
+  var i;
+  try {
+    for (i = ""; true; i = i) {
+      try {
+        try {
+          print("A1");
+          raise "A1";
+          print("raise A1 failed");
+        }
+        catch "A1" {
+          try {
+            print("B1");
+            raise "B1";
+            print("raise B1 failed");
+          }
+          catch "B1" {
+            try {
+              try {
+                print("D1");
+                raise "D1";
+                print("raise D1 failed");
+              }
+              catch "D1" {
+                print("C1");
+                raise "C1";
+                print("raise C1 failed");
+              }
+            }
+            catch "C1" {
+              if (i == "") {
+                print("root1");
+                raise "root1";
+                print("raise root1 failed");
+              } else {
+                print("root2");
+                raise "root2";
+                print("raise root2 failed");
+              }
+            }
+          }
+        }
+      }
+      catch "root1" {
+        print("'",i,"'");
+        i = "not empty";
+      }
+      catch "root2" {
+        print("err");
+        raise "err";
+        print("raise err failed");
+      }
+    }
+  }
+  catch "err" {
+    print(i);
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+A1
+B1
+D1
+C1
+root1
+''
+A1
+B1
+D1
+C1
+root2
+err
+not empty
+```
+
+*stderr*
+```
+```
+
+### Short Circuits Avoid Errors
+
+*code*
+```go
+func dyn_err(b, e) {
+  print(b, ":", e);
+  if (b) {
+    raise e;
+  }
+  return e;
+}
+
+func main() {
+  var x1; var x2; var x3; var x4;
+  var x5; var x6; var x7; var x8;
+  x1 = (dyn_err(false, true) || dyn_err(false, "avoid1")) && (dyn_err(false, false) && dyn_err(false, "avoid2"));
+  x2 = (dyn_err(false, true) || 0) && (dyn_err(false, false) && 0);
+  x3 = (dyn_err(false, true) || "0") && (dyn_err(false, false) && "0");
+  x4 = (dyn_err(false, true) || nil) && (dyn_err(false, false) && nil);
+  x5 = (dyn_err(false, true) || no_var) && (dyn_err(false, false) && no_var);
+  x6 = (dyn_err(false, true) || no_func()) && (dyn_err(false, false) && no_func());
+  x7 = (dyn_err(false, true) || inputi(1,2)) && (dyn_err(false, false) && inputi(1,2));
+  x8 = (dyn_err(false, true) || inputs(1,2)) && (dyn_err(false, false) && inputs(1,2));
+  print(x1); print(x2); print(x3); print(x4);
+  print(x5); print(x6); print(x7); print(x8);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+false:true
+false:false
+false
+false:true
+false:false
+false
+false:true
+false:false
+false
+false:true
+false:false
+false
+false:true
+false:false
+false
+false:true
+false:false
+false
+false:true
+false:false
+false
+false:true
+false:false
+false
+```
+
+*stderr*
+```
+```
+
+### Raise to Return to Catch
+
+*code*
+```go
+func lzy_err(a, b) {
+  print("lzy_err entry");
+  print(a);
+  try {
+    print(b);
+    print("after return (unreachable)");
+  }
+  catch "lazy ret" {
+    print("lazy ret caught");
+    raise "other err";
+  }
+  print("lzy_err normal exit");
+}
+
+func exp_raise(a) {
+  raise a;
+}
+
+func call_proxy() {
+  print("call_proxy entry");
+  return lzy_err(42, exp_raise("lazy ret"));
+  print("call_proxy normal exit");
+}
+
+func main() {
+  print("main entry");
+  try {
+    print(call_proxy());
+    print("after return (unreachable)");
+  }
+  catch "other err" {
+    print("other err caught");
+  }
+  print("main normal exit");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+main entry
+call_proxy entry
+lzy_err entry
+42
+lazy ret caught
+other err caught
+main normal exit
+```
+
+*stderr*
+```
 ```
 
 ## Eager-Like Behavior
