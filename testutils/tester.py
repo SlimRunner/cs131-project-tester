@@ -133,6 +133,14 @@ class TesterBase:
     def test_path(self):
         return self.__test_path
 
+    def set_kwarg(self, key, value):
+        self.__kwargs[key] = value
+
+    def get_kwarg(self, key):
+        exists = key in self.__kwargs
+        val = self.__kwargs[key] if exists else None
+        return val, exists
+
     def callback(self, prog_arg: str):
         if len(self.__kwargs):
             return self.__callback(prog_arg, **self.__kwargs)
@@ -312,6 +320,11 @@ class Tester(TesterBase):
         line_num = unit[TesterBase.LINE_NUMBER]
         error_definition = None
 
+        _, flag_exists = self.get_kwarg("debug_print")
+        if flag_exists:
+            debug_buff = io.StringIO()
+            self.set_kwarg("debug_print", debug_buff.write)
+
         with patch("builtins.input", side_effect=user_input):
             stdout_buff = io.StringIO()
             stderr_buff = io.StringIO()
@@ -444,13 +457,18 @@ class BatchRun(TesterBase):
         program_source = "\n".join(unit[TesterBase.CODE])
         user_input = unit[TesterBase.USER_INPUT]
         line_num = unit[TesterBase.LINE_NUMBER]
-        prog_out: list[str] = []
+        prog_out: list[str] = [f"> ./{os.path.relpath(self.test_path)} line {line_num}"]
 
         with patch("builtins.input", side_effect=user_input):
             stdout_buff = io.StringIO()
+            debug_buff = None
             sys.stdout = stdout_buff
 
-            print(f"> ./{os.path.relpath(self.test_path)} line {line_num}")
+            _, flag_exists = self.get_kwarg("debug_print")
+            if flag_exists:
+                debug_buff = io.StringIO()
+                self.set_kwarg("debug_print", debug_buff.write)
+
             print("```")
             try:
                 self.result.start()
@@ -466,6 +484,8 @@ class BatchRun(TesterBase):
             print("```")
             sys.stdout = sys.__stdout__
 
+        if debug_buff is not None:
+            prog_out.append(self.trim_output(debug_buff.getvalue()))
         prog_out.append(self.trim_output(stdout_buff.getvalue()))
         prog_out.append("")
 

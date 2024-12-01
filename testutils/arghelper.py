@@ -121,11 +121,11 @@ class ArgsWrapper:
         return self.__project
 
     @property
-    def verbose(self) -> str | None:
+    def verbose(self) -> bool:
         return self.__verbose
 
     @property
-    def raise_errors(self) -> str | None:
+    def raise_errors(self) -> bool:
         return self.__raise_errors
 
     @property
@@ -197,6 +197,20 @@ def getArguments(*args: str) -> ArgsWrapper:
         ),
     )
     arg_parser.add_argument(
+        "-D",
+        "--debug-fd",
+        action="store_true",
+        help=textwrap.dedent(
+            """\
+            Passes an alternative output stream to the callback to help isolate debug info.
+            Your callback should expect a parameter called debug_fd and you would call
+            `debug_print(...)` where you would have normally called print. Only timeit mode
+            will print this stream, and it will be ignored in testit mode.
+            """
+        ),
+    )
+    arg_parser.add_argument(
+        "-A",
         "--args",
         nargs="+",
         action=ArgumentPairsAction,
@@ -207,6 +221,9 @@ def getArguments(*args: str) -> ArgsWrapper:
                 --args <name1> <type1> <value1> [<name2> <type2> <value2> ...]
             Names must be valid Python identifiers, types can only be int, float, str, or
             bool, and values must parse correctly to their respective type.
+            If you are printing extra information it is recommended to use in combination
+            with --debug-fd and use the alternative stream to avoid the extra information
+            making the tester fail.
             """
         ),
     )
@@ -228,6 +245,8 @@ def getArguments(*args: str) -> ArgsWrapper:
     p_args.test_type = TestingOptions(p_args.test_type[0])
     p_args.project = p_args.project[0] if p_args.project else p_args.project
     p_args.args = p_args.args if p_args.args else dict()
+    if p_args.debug_fd:
+        p_args.args["debug_print"] = True
     p_args.section = set(p_args.section) if p_args.section else set()
     p_args.unit = set(p_args.unit) if p_args.unit else set()
     if "export" not in p_args:
