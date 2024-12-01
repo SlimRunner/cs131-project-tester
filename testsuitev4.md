@@ -1580,6 +1580,61 @@ main normal exit
 ```
 ```
 
+### Lazy Discarded Exeptions lazy_except2
+
+*code*
+```go
+func main() {
+  try {
+    /* start the FSM at "state1" */
+    fsm_lazy("state1");
+  }
+  catch "lazy_final_state" {
+    print("this should not be caught");
+  }
+  catch "final_state" {
+    print("Caught final_state in main");
+  }
+
+  print("normal exit");
+}
+
+func fsm_lazy(state) {
+  try {
+    print("In ", state);
+    raise state;
+  }
+  catch "state1" {
+    print("Caught state1, transitioning...");
+    return fsm_lazy("state2");
+  }
+  catch "state2" {
+    print("Caught state2, transitioning...");
+    return fsm_lazy("state3");
+  }
+  catch "state3" {
+    print("Caught state3, transitioning...");
+    return fsm_lazy("final_state");
+  }
+  print("this point should not be reached");
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+In state1
+Caught state1, transitioning...
+normal exit
+```
+
+*stderr*
+```
+```
+
 ## Eager-Like Behavior
 
 ### Sequential Prints
@@ -2515,6 +2570,40 @@ entry
 *stderr*
 ```
 ErrorType.NAME_ERROR
+```
+
+### Eager Function Lazy Return
+
+*code*
+```go
+func eager_call(a, b) {
+  print(a);
+  return lazy_call(b, "lazy msg");
+}
+
+func lazy_call(a, b) {
+  print(a, b);
+}
+
+func main() {
+  eager_call("doit", lazy_call("no show", 6));
+  print("normal exit");
+  return main();
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+doit
+normal exit
+```
+
+*stderr*
+```
 ```
 
 ## Legacy V2 - Input and Output
