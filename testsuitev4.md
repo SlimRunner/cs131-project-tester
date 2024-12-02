@@ -1812,6 +1812,48 @@ entry
 ```
 ```
 
+### Verify For-Condition Early Exit
+
+*code*
+```go
+func foo() {
+  print("foo");
+  return bar();
+}
+
+func bar() {
+  print("bar");
+  return 42;
+}
+
+func main() {
+  foo();
+  print(foo());
+  var _;
+  for (_ = 0; foo() == 42; _ = _ + 1) {
+    return;
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+foo
+foo
+bar
+42
+foo
+bar
+```
+
+*stderr*
+```
+```
+
 ## Lazy Evaluation
 
 ### Phantom Print
@@ -2606,6 +2648,59 @@ normal exit
 ```
 ```
 
+### Verify Lazy For-Exec Order
+
+*code*
+```go
+func assign(a) {
+  print("assign");
+  return a;
+}
+
+func cond() {
+  print("cond");
+  return true;
+}
+
+func udpate(a) {
+  print("update");
+  return a + 1;
+}
+
+func main() {
+  var n;
+  for (n = assign(0); cond(); n = udpate(n)) {
+    print("body");
+    if (n >= 2) {
+      print("exit");
+      return;
+    }
+  }
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+cond
+body
+assign
+cond
+body
+update
+cond
+body
+update
+exit
+```
+
+*stderr*
+```
+```
+
 ## Legacy V2 - Input and Output
 
 ### Print Returns nil
@@ -3201,6 +3296,8 @@ ErrorType.NAME_ERROR
 ```go
 func main() {
   var a;
+  print("this is not tested by gradescope");
+  print("if you do not pass it ignore it");
   foo("entered function");
 }
 
@@ -3208,6 +3305,7 @@ func foo(a) {
   print(a);
   var a;
   a = 12;
+  print(a);
 }
 ```
 
@@ -3217,7 +3315,10 @@ func foo(a) {
 
 *stdout*
 ```
+this is not tested by gradescope
+if you do not pass it ignore it
 entered function
+12
 ```
 
 *stderr*
@@ -4569,6 +4670,100 @@ false
 ---
 f
 false
+```
+
+*stderr*
+```
+```
+
+## Tracer Debug Tests
+
+> These can be ignored for testing
+
+### Unwind Lazy Evals
+
+*code*
+```go
+func f1() {
+  return f2();
+}
+
+func f2() {
+  return f3();
+}
+
+func f3() {
+  return 0;
+}
+
+func main() {
+  print(f1());
+  var x; x = f1();
+  print(x);
+  print(x);
+  var a;
+  a = -5;
+  print(a);
+  print(a);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+0
+0
+0
+-5
+-5
+```
+
+*stderr*
+```
+```
+
+### Cyclic Assignment
+
+*code*
+```go
+func f(a) {
+  print("a = ", a);
+  return a + 1;
+}
+
+func main() {
+  var a;
+  var b;
+  var c;
+  a = -5;
+  b = a;
+  c = b;
+  b = c;
+  a = b;
+  print(c);
+  print(c);
+  print(b);
+  print(b);
+  print(a);
+  print(a);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+-5
+-5
+-5
+-5
+-5
+-5
 ```
 
 *stderr*
