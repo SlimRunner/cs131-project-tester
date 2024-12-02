@@ -227,11 +227,10 @@ def getArguments(*args: str) -> ArgsWrapper:
         ),
     )
 
-    filter_group = arg_parser.add_mutually_exclusive_group()
-    filter_group.add_argument(
+    arg_parser.add_argument(
         "-s", "--section", nargs="+", help="Filter by a specific set of sections."
     )
-    filter_group.add_argument(
+    arg_parser.add_argument(
         "-u", "--unit", nargs="+", help="Filter by a specific set of units."
     )
 
