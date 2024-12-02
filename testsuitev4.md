@@ -3195,7 +3195,7 @@ all good
 ErrorType.NAME_ERROR
 ```
 
-### Invalid Parameter Shadow
+### Valid Parameter Shadow
 
 *code*
 ```go
@@ -3207,6 +3207,7 @@ func main() {
 func foo(a) {
   print(a);
   var a;
+  a = 12;
 }
 ```
 
@@ -3221,7 +3222,6 @@ entered function
 
 *stderr*
 ```
-ErrorType.NAME_ERROR
 ```
 
 ### Call Chain
