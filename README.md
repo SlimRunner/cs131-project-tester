@@ -68,7 +68,7 @@ python ./brewtest.py -X ../
 ```
 
 ### Filtering
-You may filter the test cases by their direct subtitle (`-u` or `--unit`) or by the subtitle one level up (`-s` or `--section`). These flags are mutually exlusive and expect one or more strings (remember to use quotes for multi word titles).
+You may filter the test cases by their direct subtitle (`-u` or `--unit`) or by the subtitle one level up (`-s` or `--section`). You can use both flags at the same time. They expect one or more strings. Remember to use quotes for multi word titles (single quotes recommended).
 
 #### Example
 
@@ -90,10 +90,17 @@ The `--args` flag allows passing parameters to the tester callback. In the case 
 
 The parameters must be passed in sets of triples that contain (1) name of parameter, (2) type of parameter, and (3) value of parameter. If your option causes the program to print extra debugging info, I recommend to use it in combination with `-t timeit` so that you can inspect the program output more easily.
 
-#### Example
-The following command runs the interpreter with the custom argument named `trace_output` set to `True`:
+A related flag is `--debug_fd`. This flags passes a parameter called `debug_print` to the callback (the run method of interpreter). This parameter can be used in place of `print` to print debug information that _will not_ interefere with the test mode, but will show up in the profiling mode.
+
+#### Examples
+The following commands run the interpreter with the custom argument named `trace_output` set to `True`:
 ```sh
+# may interefere with test cases
 python ./brewtest.py --args trace_output bool True
+# will not interfere with test cases. debug_print is discarded
+python ./brewtest.py --debug_fd --args trace_output bool True
+# will print debug_print info separately from code output.
+python ./brewtest.py -t timeit --debug_fd --args trace_output bool True
 ```
 
 ### Crash On Error
