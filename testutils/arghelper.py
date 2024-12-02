@@ -156,8 +156,7 @@ def getArguments(*args: str) -> ArgsWrapper:
         help=textwrap.dedent(
             f"""\
             Allows different modes of running your test programs. The options are:
-                - {TestingOptions.UNIT_TEST}: runs each program against the expected output
-                  and shows a diff.
+                - {TestingOptions.UNIT_TEST}: runs each program against the expected output and shows a diff.
                 - {TestingOptions.RUN_TEST}: runs each program as-is and shows the output.
             """
         ),
@@ -203,7 +202,7 @@ def getArguments(*args: str) -> ArgsWrapper:
         help=textwrap.dedent(
             """\
             Passes an alternative output stream to the callback to help isolate debug info.
-            Your callback should expect a parameter called debug_fd and you would call
+            Your callback should expect a parameter called debug_print and you would call
             `debug_print(...)` where you would have normally called print. Only timeit mode
             will print this stream, and it will be ignored in testit mode.
             """
@@ -216,14 +215,14 @@ def getArguments(*args: str) -> ArgsWrapper:
         action=ArgumentPairsAction,
         help=textwrap.dedent(
             """\
-            Pass extra arguments to your interpreter function. They must come in triples in
-            the format name-type-value triples such as:
+            Pass extra arguments to your interpreter run function. Params must come in
+            triples. The format is the following:
                 --args <name1> <type1> <value1> [<name2> <type2> <value2> ...]
             Names must be valid Python identifiers, types can only be int, float, str, or
             bool, and values must parse correctly to their respective type.
             If you are printing extra information it is recommended to use in combination
-            with --debug-fd and use the alternative stream to avoid the extra information
-            making the tester fail.
+            with --debug-fd and use the alternative stream to avoid extra information that
+            would make the tester fail.
             """
         ),
     )
