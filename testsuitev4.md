@@ -2804,6 +2804,50 @@ true
 ```
 ```
 
+### inputi arg cannot be int
+
+*code*
+```go
+func main() {
+  inputi(5);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
+### inputi arg cannot be bool
+
+*code*
+```go
+func main() {
+  inputi(true);
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.TYPE_ERROR
+```
+
 ## Legacy V2 - Variables
 
 ### Declaration and Assignment
