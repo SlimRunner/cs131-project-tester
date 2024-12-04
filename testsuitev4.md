@@ -559,7 +559,7 @@ E1 E2 and E3 were caught
 ```
 ```
 
-### Ill formed raise statement nil
+### Ill formed raise statement--nil
 
 *code*
 ```go
@@ -584,7 +584,7 @@ entry
 ErrorType.TYPE_ERROR
 ```
 
-### Ill formed raise statement int
+### Ill formed raise statement--int
 
 *code*
 ```go
@@ -609,7 +609,7 @@ entry
 ErrorType.TYPE_ERROR
 ```
 
-### Ill formed raise statement bool
+### Ill formed raise statement--bool
 
 *code*
 ```go
@@ -632,6 +632,72 @@ entry
 *stderr*
 ```
 ErrorType.TYPE_ERROR
+```
+
+### Ill formed raise statement--div0
+
+*code*
+```go
+func main() {
+  raise 1 / 0;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.FAULT_ERROR
+```
+
+### Ill formed raise statement--undef func
+
+*code*
+```go
+func main() {
+  raise foo();
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
+```
+
+### Ill formed raise statement--undef var
+
+*code*
+```go
+func main() {
+  raise foo;
+}
+```
+
+*stdin*
+```
+```
+
+*stdout*
+```
+```
+
+*stderr*
+```
+ErrorType.NAME_ERROR
 ```
 
 ### Bad variable value for raise (lazy)
